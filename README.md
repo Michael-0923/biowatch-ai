@@ -61,3 +61,7 @@ BioWatch 已新增 Google Identity Services 按鈕、登入帳號/頭像、登�
 - `/api/auth/config` 和 `/api/auth/session` 可供確認配置；未設 Client ID 時會回應 `configured:false`，**不是登入故障**。
 - 登入功能只顯示帳號狀態，不會自動將監控畫面、紀錄或 Google 個人資料傳給第三方資料庫。模型仍依既有 CDN 與本機推論機制運作。
 - 本專案沒有完全鎖住網站：不登入仍可進行生物偵測。若未來需要「一定要登入才能看監控」、雲端紀錄與跨裝置同步，需另行設計存取控制與資料庫。
+
+## 自動部署重新觸發
+
+2026-11-16：GitHub App 重新授權後，更新此文件以測試 Cloudflare Workers Builds 的 `main` 分支自動部署。若未出現新建置，請在 Cloudflare → Settings → Builds 檢查 Git 授權與觸發狀態。
