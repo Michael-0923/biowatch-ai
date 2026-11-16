@@ -1,20 +1,32 @@
-# BioWatch AI｜生物偵測警報系統
+# BioWatch AI 生物偵測警報系統 · V2.0
 
-這是 BioWatch AI 的固定網址網站版本。主程式為根目錄的 `index.html`，CSS 與 JavaScript 均內嵌，不需要額外建置或安裝套件。
+網址：**https://biowatch-ai.michael09230923.workers.dev/**（Cloudflare Workers；若無法連線請先確認 Worker URL 的「生產」開關已啟用）。
 
-## Cloudflare Pages 部署
-1. 進入 https://dash.cloudflare.com/ → Workers & Pages → Create application → Pages。
-2. 選 Connect to Git / Import existing Git repository，授權並選擇 `Michael-0923/biowatch-ai`。
-3. 建議 Project name: `biowatch-ai`（以 Cloudflare 可用名稱為準）；Production branch: `main`。
-4. Framework preset: None；Build command: 留空（如果要求填寫可用 `exit 0`）；Build output directory: `.`。
-5. 部署完成後，到 Cloudflare 專案首頁確認正式的 `https://<project>.pages.dev/` 網址。
+## 使用方式
 
-## 更新
-之後每次修改並提交 `main` 分支的 `index.html`，Cloudflare Pages 的 Git 整合便會自動部署，新版本沿用原本的正式網址。請不要把 ZIP 直接當成 index.html 上傳。
+1. 使用 Chrome/Edge 開啟上方 HTTPS 網址並允許攝影機權限。
+2. 選擇鏡頭或上傳照片/影片，按「開始偵測」。
+3. 一般辨識（COCO-SSD）會偵測人、貓、狗、鳥、熊、馬等 11 種類別（含人），預設分數門檻 65%，同一種類在相近位置連續辨識 3 次才警報。門檻、次數、冷卻時間皆可調整。
+4. 若要擴充野生動物或「疑似保育類」，勾選「進階野生動物辨識（實驗）」。首次需要下載約 150 MB 的 CLIP q8 模型（外加執行資源），之後約每 5 秒做一次場景/動物局部比對。模型較慢、耗流量與記憶體；失敗時不影響基本偵測。
+5. 進階比對目前納入石虎、臺灣黑熊、穿山甲、歐亞水獺、黑面琵鷺、草鴞、熊鷹、臺灣藍鵲、藍腹鷴、臺灣野山羊、黃喉貂，及猴子、野豬、鹿、松鼠、兔子、蛇、蛙、蜥蜴、龜、蝴蝶等野生動物候選。
 
-## 功能及限制
-- 支援目前裝置的內建/USB/手機鏡頭、照片與影片測試、網路影像 URL（網路鏡頭需另外架設 HTTPS 與允許跨來源讀取；不能直接開 RTSP）。
-- 利用瀏覽器端 TensorFlow.js COCO-SSD 進行人、貓、狗、鳥等常見生物辨識，提供聲音警示與本機紀錄。
-- **不是所有生物都能辨識**；網頁需保持開啟、瀏覽器允許攝影機，才能持續偵測。
-- 首次載入 AI 模型需要網路，且可能受 CDN 與裝置效能影響；若無法啟動，請先檢查瀏覽器主控台及鏡頭授權。
-- Cloudflare Pages 只負責網站託管，並非全天候的雲端攝影機監控服務。
+**保育類辨識不是法定物種鑑定。** 進階 CLIP 輸出的百分比僅為固定候選標籤之間的相對分數，不是真實存在機率或統計校準的可信度；相似物種、夜間光線與影像模糊可能誤判。請保存原始畫面，必要時由專家判讀。
+
+保育行動參考：https://www.forest.gov.tw/0004752
+
+## GitHub → Cloudflare 自動部署
+
+Cloudflare Workers 專案：`biowatch-ai`
+
+Wrangler 設定：`wrangler.jsonc`
+
+- **正式提供給網站的檔案在 `public/index.html`**（由 `assets.directory=./public` 指定），部署指令 `npx wrangler deploy`。
+- 根目錄的 `index.html` 是方便預覽的同步備份；**只改根目錄而不改 `public/index.html` 不會更新正式網站**。
+- 修改 `public/index.html` 並提交到 `main`，Cloudflare 連接 GitHub 的情況下會自動觸發新建置/部署。網址保持不變。
+- 建置後可到 Cloudflare → Workers 和 Pages → biowatch-ai → 部署，確認最新 commit 已部署；在瀏覽器按 Ctrl+F5 強制重新載入。
+
+## 注意
+
+- 模型的運算在瀏覽器裝置端進行，頁面需保持開啟。第一次使用需要下載外部模型及依賴 CDN；不包含全天候背景監控、動物真正追蹤、手機離線推播。
+- RTSP 不可直接在一般瀏覽器播放；須先由本機或 HTTPS 影像轉接服務提供可讀取的影像來源。
+- 警報紀錄存在本機瀏覽器 localStorage；清除網站資料會刪除紀錄。
