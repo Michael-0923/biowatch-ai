@@ -41,7 +41,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V4.1 · ULTRA STRICT</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V5.0 · VERIFIED FIRST</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -93,13 +93,14 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
        <div class="subheading">想要警示的生物類別</div>
        <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
        <div class="divider"></div>
-        <label class="toggle-line"><span><strong>跨物種進階辨識（實驗）</strong><small>支援廣域大分類與自訂物種候選；模型需另行下載，大小與速度依裝置而異。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
+        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>預設僅在一般模型確認動物後才比對物種；不等於專業物種鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
+        <label class="toggle-line"><span><strong>讓疑似物種直接發出警報（實驗）</strong><small>預設關閉。CLIP 不是經校準的物種辨識器，建議先人工複核候選結果。</small></span><input type="checkbox" id="speciesAlertToggle" role="switch"></label>
         <label for="advancedScope" class="field-label">進階辨識範圍</label>
         <select id="advancedScope"><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
         <p class="scope-explain" id="scopeDescription">全球模式採「大類 → 候選物種」兩階段比對，候選物種並非全世界完整名錄，結果只代表影像相似的可能性。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
         <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
-        <p class="hint" id="advancedStatus" aria-live="polite">預設開啟進階物種比對（實驗）；首次需下載大型模型。若裝置效能不足，可手動停用。</p><p class="hint" id="precisionStatus" aria-live="polite">V4.1：永遠預設極嚴格模式；逐目標追蹤、時間確認、影像品質檢查、保育類雙視角與多次驗證。模型分數不是正確率。</p>
+        <p class="hint" id="advancedStatus" aria-live="polite">候選分析預設啟用，但須先有可信動物目標；物種自動警報預設關閉。</p><p class="hint" id="precisionStatus" aria-live="polite">V5.0：先確認動物存在，再提供疑似物種。空景不猜物種，疑似物種不自動警報；可在紀錄中標記誤判。</p>
        <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
@@ -107,8 +108,8 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
       </section>
     </aside>
    </div>
-   <section class="panel history-panel"><div class="panel-head history-head"><div><div class="panel-kicker">ACTIVITY LOG</div><h3>警報事件紀錄 <span id="historyCount" class="history-count">0</span></h3></div><div class="history-actions"><button class="secondary small" id="exportBtn">匯出 CSV</button><button class="secondary small" id="clearBtn">清除紀錄</button></div></div><div class="log-list" id="logList"><div class="log-empty">目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。</div></div></section>
-   <section class="notice"><strong>全球辨識的限制與可信度</strong><p>一般即時目標框使用 COCO-SSD，僅支援固定的少數動物與人。進階全球模式使用 CLIP 先比對生物門類，再於目前內建的多種候選物種中找相似影像，包括哺乳類、鳥類、爬蟲類、兩棲類、魚類、昆蟲、蜘蛛與其他節肢動物、海洋無脊椎動物、植物及真菌，也可自行輸入額外英文／學名。<strong>這不是全世界所有物種的辨識資料庫；未知、新發現、微生物，以及畫質不足的生物都可能無法辨識。</strong></p><p>「疑似物種」及顯示的百分比只是候選之間的相對比較分數，<strong>並非可信度保證、真正機率、法定保育類鑑定或已確認物種。</strong> 任何保育類、罕見生物都需要保留原始影像並交由專家複核。植物與真菌可能是靜止目標，啟用靜態分析會增加誤報可能。瀏覽器必須保持開啟；模型下載需網路與裝置資源。一般鏡頭不能辨識肉眼不可見的微生物。</p></section>
+   <section class="panel history-panel"><div class="panel-head history-head"><div><div class="panel-kicker">ACTIVITY LOG</div><h3>警報事件紀錄 <span id="historyCount" class="history-count">0</span></h3></div><div class="history-actions"><button class="secondary small" id="exportBtn">匯出 CSV</button><button class="secondary small" id="clearBtn">清除紀錄</button></div></div><p class="hint review-help">每筆警報可標記「正確／誤判」，便於匯出實際測試結果；這不會自行重新訓練 AI。</p><div class="log-list" id="logList"><div class="log-empty">目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。</div></div></section>
+   <section class="notice"><strong>先偵測動物，再猜測候選物種：避免空景誤判</strong><p>一般即時目標框使用 COCO-SSD，僅支援固定的少數動物與人。進階全球模式使用 CLIP 先比對生物門類，再於目前內建的多種候選物種中找相似影像，包括哺乳類、鳥類、爬蟲類、兩棲類、魚類、昆蟲、蜘蛛與其他節肢動物、海洋無脊椎動物、植物及真菌，也可自行輸入額外英文／學名。<strong>這不是全世界所有物種的辨識資料庫；未知、新發現、微生物，以及畫質不足的生物都可能無法辨識。</strong></p><p>「疑似物種」及顯示的百分比只是候選之間的相對比較分數，<strong>並非可信度保證、真正機率、法定保育類鑑定或已確認物種。</strong> 任何保育類、罕見生物都需要保留原始影像並交由專家複核。植物與真菌可能是靜止目標，啟用靜態分析會增加誤報可能。瀏覽器必須保持開啟；模型下載需網路與裝置資源。一般鏡頭不能辨識肉眼不可見的微生物。</p></section>
   </main>
   <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。</footer>
  </div>
@@ -503,7 +504,7 @@ const state = {
   source:null, localUrl:null, predictions:[], lastSeen:new Map(), lastAlert:new Map(),
   alertCount:0, detectionHz:0, lastDetectAt:0, raf:0, timer:0, lastDrawAt:0, audio:null,
   history:[], notificationReady:false,
-  tracks:new Map(), nextTrackId:1, advancedModel:null, advancedLoading:null, advancedError:false,
+  tracks:new Map(), nextTrackId:1, motionFrame:null, motionState:null, advancedModel:null, advancedLoading:null, advancedError:false,
   advancedCandidate:null, advancedEvidence:null, advancedBusy:false,
   advancedTimer:0, advancedFrame:null, lastMotion:0
 };
@@ -721,10 +722,14 @@ function sceneChange(){
   }
   return changed/Math.max(1,total)>.035;
 }
+function confirmedAnimalTarget(){
+  const candidates=state.predictions.filter(p=>p.class!=='person'&&state.tracks.get(p.trackId)?.confirmed);
+  return candidates.sort((a,b)=>b.score-a.score)[0]||null;
+}
 function snapshotForAdvanced(){
   const dims=getDims();if(!dims)return null;
   const animals=state.predictions.filter(p=>p.class!=='person').sort((a,b)=>b.score-a.score);
-  const animal=animals[0];
+  const animal=$('precisionProfile').value==='strict' ? confirmedAnimalTarget() : animals[0];
   const [width,height]=dims;
   let sx=0,sy=0,sw=width,sh=height;
   if(animal){
@@ -792,9 +797,17 @@ async function startAdvanced(runId){
   clearTimeout(state.advancedTimer);
   state.advancedBusy=true;
   try{
+    const strict=$('precisionProfile').value==='strict';
+    // A CLIP candidate by itself does not establish that a living organism exists.
+    // Prevent the common empty-scene -> rare-species hallucination.
+    if(strict&&!confirmedAnimalTarget()){
+      state.advancedCandidate=null;state.advancedEvidence=null;
+      advancedNote('先確認生物存在：一般模型尚無通過追蹤驗證的動物，暫停猜測物種。');
+      reflectDetections();return;
+    }
     const model=await loadAdvancedModel();
     if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
-    advancedNote('進階模型運作中 · 約每 5 秒比對一次；只提供候選線索');
+    advancedNote('已確認動物目標，正在比對物種候選（非正式鑑定）');
     const moving=sceneChange();
     const staticFile=$('sourceType').value==='file'&&state.source?.tagName==='IMG';
     const hasAnimal=state.predictions.some(p=>p.class!=='person');
@@ -835,14 +848,14 @@ async function startAdvanced(runId){
       const item={kind:candidate[0],score:best.score,count,protected:candidate[2]==='protected',alerted:wasAlerted};
       state.advancedEvidence=item;state.advancedCandidate=item;
       const required=$('precisionProfile').value==='strict'?4:2;
-      if(count>=required&&!wasAlerted){
+      if(count>=required&&!wasAlerted&&$('speciesAlertToggle').checked){
         const now=performance.now(),last=state.lastAlert.get(candidate[0])||-Infinity;
         if(now-last>Number($('cooldown').value)*1000){
           state.lastAlert.set(candidate[0],now);item.alerted=true;
           addAlert(candidate[0],best.score,{kind:'advanced',detail:`候選標籤連續比對 ${count} 次；與第二名差距 ${Math.round(gap*100)} 個百分點。需人工複核。`});
         }
       }
-      advancedNote(`進階候選：${comparison.familyName||'自訂／臺灣'} · 疑似${candidate[1]}，相對比對 ${Math.round(best.score*100)}%，連續 ${count}/${required}；需人工複核`);
+      advancedNote(`進階候選：${comparison.familyName||'自訂／臺灣'} · 疑似${candidate[1]}，相對比對 ${Math.round(best.score*100)}%，連續 ${count}/${required}；${$('speciesAlertToggle').checked?'啟用實驗警報':'僅顯示候選，不自動警報'}；需人工複核`);
     }
     reflectDetections();
   }catch(err){
@@ -866,7 +879,7 @@ async function start(){
   if(state.running)return;
   const runId=++state.session;
   state.running=true;state.predictions=[];state.lastSeen.clear();state.lastAlert.clear();
-  state.tracks.clear();state.nextTrackId=1;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
+  state.tracks.clear();state.nextTrackId=1;state.motionFrame=null;state.motionState=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
   state.lastDetectAt=0; state.detectionHz=0;
   updateControls();updateStatus('busy','連接來源中…');
   $('stageEmpty').hidden=false;$('stageEmpty').querySelector('strong').textContent='正在啟動影像來源…';
@@ -908,7 +921,7 @@ function stop(changeStatus=true){
   els.image.removeAttribute('src');
   if(state.localUrl){URL.revokeObjectURL(state.localUrl);state.localUrl=null;}
   state.source=null;state.predictions=[];state.lastSeen.clear();
-  state.tracks.clear();state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;
+  state.tracks.clear();state.motionFrame=null;state.motionState=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;
   els.ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
   $('overlay').style.display='none'; $('stageFooter').hidden=true;
   $('stageEmpty').hidden=false;
@@ -1038,7 +1051,7 @@ function updateTracks(now){
 function reflectDetections(){
   const records=state.predictions;
   const advanced=state.advancedCandidate;
-  $('currentCount').innerHTML=`${records.length+(advanced?1:0)} <span>個／候選</span>`;
+  $('currentCount').innerHTML=`${records.filter(p=>state.tracks.get(p.trackId)?.confirmed).length} <span>已確認個體</span>`;
   const chips=$('detectedChips');chips.replaceChildren();
   if(!records.length&&!advanced){chips.append(makeChip('目前沒有通過設定門檻的目標','empty-chip'));$('detectedSummary').textContent='沒有目標';return;}
   $('detectedSummary').textContent=`一般偵測 ${records.length} 個${advanced?' · 進階候選 1 種':''}`;
@@ -1154,6 +1167,10 @@ $('confidence').addEventListener('input',updateSliders);
 $('confirmFrames').addEventListener('input',updateSliders);
 $('speciesThreshold').addEventListener('input',updateSliders);
 $('cooldown').addEventListener('input',updateSliders);
+$('speciesAlertToggle').addEventListener('change',()=>{
+  if(!$('speciesAlertToggle').checked)tell('已關閉物種候選的自動警報，仍會顯示供人工複核的候選結果。');
+  else tell('已開啟實驗性物種警報，候選結果可能誤判；建議保留人工複核。',true);
+});
 $('advancedToggle').addEventListener('change',()=>{if($('advancedToggle').checked){state.advancedError=false;if(state.running)startAdvanced(state.session);}else{clearTimeout(state.advancedTimer);state.advancedCandidate=null;state.advancedEvidence=null;$('advancedStatus').textContent='已停用進階野生動物比對。';reflectDetections();}});
 $('startBtn').addEventListener('click',start);$('stopBtn').addEventListener('click',()=>stop());
 $('captureBtn').addEventListener('click',capture);
@@ -1174,6 +1191,7 @@ function setUltraStrictDefault(){
   $('speciesThreshold').value='26';
   $('stationaryToggle').checked=false;
   $('advancedToggle').checked=true;
+  $('speciesAlertToggle').checked=false;
   updateSliders();
 }
 setUltraStrictDefault();
