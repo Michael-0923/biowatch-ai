@@ -11,16 +11,18 @@
 
 #deviceSelect,#fileInput,#networkUrl{width:100%}
 
+
+#advancedScope,#customSpecies{width:100%} #customScopeBox[hidden]{display:none} #customScopeBox{margin-top:12px;border:1px solid #344456;padding:12px;border-radius:10px;background:#101926} #customSpecies{border:1px solid #37465a;background:#101926;border-radius:9px;color:#d9e3f0;padding:10px;min-height:42px} .scope-explain{font-size:11px;color:#9fb3c7;line-height:1.7;margin:10px 0 12px}.mirror-note{font-size:11px;color:#8ea4ba;margin-top:-5px;margin-bottom:12px}
 </style>
 </head>
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V2.0 · WILDLIFE</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V3.0 · WORLD BIODIVERSITY</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span></div>
   </header>
   <main>
-   <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">雙模型辨識 · 保育類候選識別 <span>↗</span></div></section>
+   <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">鏡像鏡頭 · 全球廣域生物候選辨識 <span>↗</span></div></section>
    <div class="stats">
       <div class="stat"><div class="stat-label">目前偵測目標</div><div class="stat-value" id="currentCount">0 <span>個</span></div></div>
       <div class="stat"><div class="stat-label">本次警報次數</div><div class="stat-value" id="alertCount">0 <span>次</span></div></div>
@@ -47,17 +49,23 @@
        <div id="cameraFields"><div class="field-row"><label for="deviceSelect" class="field-label">選擇鏡頭</label><button class="link-button" id="refreshBtn">重新掃描</button></div><select id="deviceSelect"><option value="">預設鏡頭（手機優先後鏡頭）</option></select><p class="hint">需允許瀏覽器使用鏡頭；手機可切換前後鏡頭（視裝置而定）。</p></div>
        <div id="fileFields" hidden><label for="fileInput" class="field-label">選擇檔案</label><input id="fileInput" type="file" accept="video/*,image/*"><p class="hint">用既有照片或影片測試 AI 是否正確辨識。</p></div>
        <div id="networkFields" hidden><label for="networkUrl" class="field-label">MJPEG / 影像網址</label><input id="networkUrl" type="url" placeholder="例如 http://127.0.0.1:8765/stream"><p class="hint">RTSP 鏡頭請使用附贈的 camera_bridge.py 轉接。跨來源網址必須允許 CORS，且不得被瀏覽器安全政策阻擋。</p></div>
-      </section>
-      <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">DETECTION RULES</div><h3>辨識與警報設定</h3></div></div>
+        <div class="divider"></div><label class="toggle-line"><span><strong>鏡像畫面（水平翻轉）</strong><small>預設開啟；只翻轉畫面和偵測框，中文標籤不會變成反字，截圖也會鏡像。</small></span><input id="mirrorToggle" type="checkbox" role="switch" checked></label>
+       </section>
+       <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">DETECTION RULES</div><h3>辨識與警報設定</h3></div></div>
        <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">65%</strong></div><input id="confidence" type="range" min="40" max="90" step="5" value="65"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
        <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">3 次</strong></div><input id="confirmFrames" type="range" min="2" max="5" step="1" value="3"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
        <div class="range-heading cooldown-heading"><label for="cooldown" class="field-label">同類警報冷卻時間</label><strong id="cooldownValue">15 秒</strong></div><input id="cooldown" type="range" min="5" max="120" step="5" value="15"><div class="range-ends"><span>5 秒</span><span>120 秒</span></div>
        <div class="subheading">想要警示的生物類別</div>
        <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
        <div class="divider"></div>
-       <label class="toggle-line"><span><strong>進階野生動物辨識（實驗）</strong><small>比對石虎、穿山甲、臺灣黑熊、草鴞等候選物種；初次需下載約 150 MB AI 模型。</small></span><input type="checkbox" id="advancedToggle" role="switch"></label>
-       <p class="hint" id="advancedStatus" aria-live="polite">未啟用。可先使用一般辨識；啟用後會另外下載 CLIP 模型。</p>
-       <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">25%</strong></div><input id="speciesThreshold" type="range" min="15" max="65" step="5" value="25"><p class="hint">此為候選標籤間的相對分數，不是物種真實機率。需有明顯領先差距、連續比對，才可能提示。</p>
+        <label class="toggle-line"><span><strong>跨物種進階辨識（實驗）</strong><small>支援廣域大分類與自訂物種候選；模型需另行下載，大小與速度依裝置而異。</small></span><input type="checkbox" id="advancedToggle" role="switch"></label>
+        <label for="advancedScope" class="field-label">進階辨識範圍</label>
+        <select id="advancedScope"><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
+        <p class="scope-explain" id="scopeDescription">全球模式採「大類 → 候選物種」兩階段比對，候選物種並非全世界完整名錄，結果只代表影像相似的可能性。</p>
+        <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
+        <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" checked role="switch"></label>
+        <p class="hint" id="advancedStatus" aria-live="polite">未啟用。一般辨識仍使用 COCO-SSD；啟用後會下載 CLIP 模型。</p>
+       <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">18%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="18"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
        <button id="notifyBtn" class="outline-full">啟用桌面通知</button><p class="hint" id="notifyStatus">桌面通知依瀏覽器與作業系統支援情況而定。</p>
@@ -65,7 +73,7 @@
     </aside>
    </div>
    <section class="panel history-panel"><div class="panel-head history-head"><div><div class="panel-kicker">ACTIVITY LOG</div><h3>警報事件紀錄 <span id="historyCount" class="history-count">0</span></h3></div><div class="history-actions"><button class="secondary small" id="exportBtn">匯出 CSV</button><button class="secondary small" id="clearBtn">清除紀錄</button></div></div><div class="log-list" id="logList"><div class="log-empty">目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。</div></div></section>
-   <section class="notice"><strong>辨識範圍說明</strong><p>一般辨識採用 COCO-SSD，可偵測<strong>人、鳥、貓、狗、馬、羊、牛、大象、熊、斑馬、長頸鹿</strong>，較嚴格門檻與連續影格確認可降低部分誤報。進階功能另以 CLIP 比對<strong>石虎、臺灣黑熊、穿山甲、歐亞水獺、黑面琵鷺、草鴞、熊鷹、臺灣藍鵲、藍腹鷴、臺灣野山羊、黃喉貂</strong>及其他常見野生動物。<strong>進階結果只代表視覺相似的「疑似物種」，不是已確認保育類，也不是法定鑑定或真實機率</strong>；外觀相近、夜間、模糊畫面很容易誤判，請保存原始畫面並由專家複核。</p><p>模型首次使用需要網路下載，進階模型可能耗用較多記憶體、流量與時間。推論在裝置端進行，圖片不會由本程式主動傳給雲端辨識；模型本身從第三方 CDN／Hugging Face 下載。保育類偵測為輔助線索，可能漏報；監控需保持網頁及鏡頭持續運作，警報歷史只保存在目前瀏覽器。</p></section>
+   <section class="notice"><strong>全球辨識的限制與可信度</strong><p>一般即時目標框使用 COCO-SSD，僅支援固定的少數動物與人。進階全球模式使用 CLIP 先比對生物門類，再於目前內建的多種候選物種中找相似影像，包括哺乳類、鳥類、爬蟲類、兩棲類、魚類、昆蟲、蜘蛛與其他節肢動物、海洋無脊椎動物、植物及真菌，也可自行輸入額外英文／學名。<strong>這不是全世界所有物種的辨識資料庫；未知、新發現、微生物，以及畫質不足的生物都可能無法辨識。</strong></p><p>「疑似物種」及顯示的百分比只是候選之間的相對比較分數，<strong>並非可信度保證、真正機率、法定保育類鑑定或已確認物種。</strong> 任何保育類、罕見生物都需要保留原始影像並交由專家複核。植物與真菌可能是靜止目標，啟用靜態分析會增加誤報可能。瀏覽器必須保持開啟；模型下載需網路與裝置資源。一般鏡頭不能辨識肉眼不可見的微生物。</p></section>
   </main>
   <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。</footer>
  </div>
@@ -108,6 +116,237 @@ const SPECIES = [
   ['frog','蛙','other','🐸','a photograph of a frog'],
   ['butterfly','蝴蝶','other','🦋','a photograph of a butterfly'],
   ['mouse','鼠','other','🐭','a photograph of a mouse'],
+];
+const TAIWAN_SPECIES_COUNT = SPECIES.length;
+// Broad-coverage examples, not an exhaustive taxonomy or validated species classifier.
+const WORLD_SPECIES_TEXT = `camel|駱駝|mammals|🐪|camel
+llama|羊駝|mammals|🦙|llama
+alpaca|駱馬|mammals|🦙|alpaca
+wolf|狼|mammals|🐺|wolf
+arctic_fox|北極狐|mammals|🦊|arctic fox
+polar_bear|北極熊|mammals|🐻‍❄️|polar bear
+tiger|老虎|mammals|🐅|tiger
+lion|獅子|mammals|🦁|lion
+leopard|豹|mammals|🐆|leopard
+cheetah|獵豹|mammals|🐆|cheetah
+snow_leopard|雪豹|mammals|🐆|snow leopard
+jaguar|美洲豹|mammals|🐆|jaguar
+giant_panda|大貓熊|mammals|🐼|giant panda
+red_panda|小貓熊|mammals|🦝|red panda
+giant_anteater|大食蟻獸|mammals|🦣|giant anteater
+sloth|樹懶|mammals|🦥|sloth
+koala|無尾熊|mammals|🐨|koala
+kangaroo|袋鼠|mammals|🦘|kangaroo
+wallaby|小袋鼠|mammals|🦘|wallaby
+hippopotamus|河馬|mammals|🦛|hippopotamus
+rhinoceros|犀牛|mammals|🦏|rhinoceros
+gorilla|大猩猩|mammals|🦍|gorilla
+chimpanzee|黑猩猩|mammals|🐵|chimpanzee
+orangutan|紅毛猩猩|mammals|🦧|orangutan
+bat|蝙蝠|mammals|🦇|bat
+hedgehog|刺蝟|mammals|🦔|hedgehog
+beaver|河狸|mammals|🦫|beaver
+moose|駝鹿|mammals|🦌|moose
+reindeer|馴鹿|mammals|🦌|reindeer
+bison|野牛|mammals|🦬|bison
+antelope|羚羊|mammals|🦌|antelope
+boar|野豬（廣域）|mammals|🐗|wild boar
+lemur|狐猴|mammals|🐒|lemur
+seal|海豹|mammals|🦭|seal
+walrus|海象|mammals|🦭|walrus
+sea_lion|海獅|mammals|🦭|sea lion
+dolphin|海豚|mammals|🐬|dolphin
+whale|鯨魚|mammals|🐋|whale
+orca|虎鯨|mammals|🐳|orca
+manatee|海牛|mammals|🐋|manatee
+penguin|企鵝|birds|🐧|penguin
+flamingo|紅鶴|birds|🦩|flamingo
+parrot|鸚鵡|birds|🦜|parrot
+eagle|老鷹|birds|🦅|eagle
+owl|貓頭鷹|birds|🦉|owl
+hummingbird|蜂鳥|birds|🐦|hummingbird
+kingfisher|翠鳥|birds|🐦|kingfisher
+toucan|巨嘴鳥|birds|🦜|toucan
+woodpecker|啄木鳥|birds|🐦|woodpecker
+peacock|孔雀|birds|🦚|peacock
+ostrich|鴕鳥|birds|🐦|ostrich
+swan|天鵝|birds|🦢|swan
+duck|鴨|birds|🦆|duck
+goose|鵝|birds|🪿|goose
+chicken|雞|birds|🐔|chicken
+stork|鸛|birds|🐦|stork
+heron|鷺鷥|birds|🐦|heron
+albatross|信天翁|birds|🐦|albatross
+puffin|海鸚|birds|🐧|puffin
+pigeon|鴿子|birds|🕊️|pigeon
+sparrow|麻雀|birds|🐦|sparrow
+crow|烏鴉|birds|🐦|crow
+seagull|海鷗|birds|🐦|seagull
+crocodile|鱷魚|reptiles|🐊|crocodile
+alligator|短吻鱷|reptiles|🐊|alligator
+cobra|眼鏡蛇|reptiles|🐍|cobra
+python|蟒蛇|reptiles|🐍|python
+viper|蝮蛇|reptiles|🐍|viper
+rattlesnake|響尾蛇|reptiles|🐍|rattlesnake
+iguana|鬣蜥|reptiles|🦎|iguana
+gecko|壁虎|reptiles|🦎|gecko
+chameleon|變色龍|reptiles|🦎|chameleon
+monitor_lizard|巨蜥|reptiles|🦎|monitor lizard
+komodo_dragon|科莫多龍|reptiles|🦎|komodo dragon
+sea_turtle|海龜|reptiles|🐢|sea turtle
+tortoise|陸龜|reptiles|🐢|tortoise
+skink|石龍子|reptiles|🦎|skink
+salamander|蠑螈|amphibians|🐸|salamander
+newt|水螈|amphibians|🐸|newt
+axolotl|美西螈|amphibians|🐸|axolotl
+toad|蟾蜍|amphibians|🐸|toad
+tree_frog|樹蛙|amphibians|🐸|tree frog
+poison_dart_frog|箭毒蛙|amphibians|🐸|poison dart frog
+caecilian|蚓螈|amphibians|🐸|caecilian
+shark|鯊魚|fish|🦈|shark
+whale_shark|鯨鯊|fish|🦈|whale shark
+ray|魟魚|fish|🐟|stingray
+manta_ray|鬼蝠魟|fish|🐟|manta ray
+seahorse|海馬|fish|🐠|seahorse
+clownfish|小丑魚|fish|🐠|clownfish
+goldfish|金魚|fish|🐠|goldfish
+koi|錦鯉|fish|🐟|koi carp
+salmon|鮭魚|fish|🐟|salmon
+tuna|鮪魚|fish|🐟|tuna
+eel|鰻魚|fish|🐟|eel
+pufferfish|河豚|fish|🐡|pufferfish
+lionfish|獅子魚|fish|🐠|lionfish
+angelfish|神仙魚|fish|🐠|angelfish
+catfish|鯰魚|fish|🐟|catfish
+betta|鬥魚|fish|🐠|betta fish
+butterflyfish|蝶魚|fish|🐠|butterflyfish
+bee|蜜蜂|insects|🐝|honeybee
+bumblebee|熊蜂|insects|🐝|bumblebee
+wasp|黃蜂|insects|🐝|wasp
+hornet|胡蜂|insects|🐝|hornet
+ant|螞蟻|insects|🐜|ant
+termite|白蟻|insects|🐜|termite
+moth|蛾|insects|🦋|moth
+dragonfly|蜻蜓|insects|🪰|dragonfly
+damselfly|豆娘|insects|🪰|damselfly
+ladybug|瓢蟲|insects|🐞|ladybug
+beetle|甲蟲|insects|🪲|beetle
+stag_beetle|鍬形蟲|insects|🪲|stag beetle
+rhinoceros_beetle|獨角仙|insects|🪲|rhinoceros beetle
+firefly|螢火蟲|insects|🪲|firefly
+grasshopper|蚱蜢|insects|🦗|grasshopper
+cricket|蟋蟀|insects|🦗|cricket
+mantis|螳螂|insects|🦗|praying mantis
+cicada|蟬|insects|🪰|cicada
+cockroach|蟑螂|insects|🪳|cockroach
+mosquito|蚊子|insects|🦟|mosquito
+fly|蒼蠅|insects|🪰|housefly
+fruit_fly|果蠅|insects|🪰|fruit fly
+stick_insect|竹節蟲|insects|🦗|stick insect
+walking_leaf|葉䗛|insects|🦗|leaf insect
+caterpillar|毛毛蟲|insects|🐛|caterpillar
+silkworm|蠶|insects|🐛|silkworm
+flea|跳蚤|insects|🐛|flea
+lacewing|草蛉|insects|🦋|lacewing
+spider|蜘蛛|arachnids|🕷️|spider
+tarantula|捕鳥蛛|arachnids|🕷️|tarantula
+scorpion|蠍子|arachnids|🦂|scorpion
+tick|壁蝨|arachnids|🕷️|tick
+mite|蟎|arachnids|🕷️|mite
+harvestman|盲蛛|arachnids|🕷️|harvestman
+horseshoe_crab|鱟|marine|🦀|horseshoe crab
+crab|螃蟹|crustaceans|🦀|crab
+hermit_crab|寄居蟹|crustaceans|🦀|hermit crab
+lobster|龍蝦|crustaceans|🦞|lobster
+shrimp|蝦|crustaceans|🦐|shrimp
+prawn|明蝦|crustaceans|🦐|prawn
+krill|磷蝦|crustaceans|🦐|krill
+barnacle|藤壺|crustaceans|🐚|barnacle
+woodlouse|鼠婦|crustaceans|🐛|woodlouse
+snail|蝸牛|mollusks|🐌|snail
+slug|蛞蝓|mollusks|🐌|slug
+octopus|章魚|mollusks|🐙|octopus
+squid|魷魚|mollusks|🦑|squid
+cuttlefish|烏賊|mollusks|🦑|cuttlefish
+clam|蛤蜊|mollusks|🐚|clam
+oyster|牡蠣|mollusks|🦪|oyster
+mussel|貽貝|mollusks|🐚|mussel
+nautilus|鸚鵡螺|mollusks|🐚|nautilus
+jellyfish|水母|marine|🪼|jellyfish
+sea_anemone|海葵|marine|🪸|sea anemone
+coral|珊瑚|marine|🪸|coral reef polyp
+sea_star|海星|marine|⭐|starfish
+sea_urchin|海膽|marine|🦔|sea urchin
+sea_cucumber|海參|marine|🌊|sea cucumber
+sponge|海綿動物|marine|🧽|sea sponge
+earthworm|蚯蚓|marine|🪱|earthworm
+leech|水蛭|marine|🪱|leech
+centipede|蜈蚣|marine|🐛|centipede
+millipede|馬陸|marine|🐛|millipede
+oak|橡樹|plants|🌳|oak tree
+pine|松樹|plants|🌲|pine tree
+bamboo|竹子|plants|🎋|bamboo
+palm|棕櫚樹|plants|🌴|palm tree
+maple|楓樹|plants|🍁|maple tree
+cherry_blossom|櫻花樹|plants|🌸|cherry blossom tree
+orchid|蘭花|plants|🌸|orchid flower
+rose|玫瑰|plants|🌹|rose flower
+sunflower|向日葵|plants|🌻|sunflower
+tulip|鬱金香|plants|🌷|tulip
+lotus|蓮花|plants|🪷|lotus flower
+water_lily|睡蓮|plants|🪷|water lily
+cactus|仙人掌|plants|🌵|cactus
+succulent|多肉植物|plants|🪴|succulent plant
+fern|蕨類|plants|🌿|fern
+moss|苔蘚|plants|🌿|moss
+seaweed|海藻|plants|🌊|seaweed
+kelp|巨藻|plants|🌊|kelp
+mangrove|紅樹林植物|plants|🌳|mangrove tree
+venus_flytrap|捕蠅草|plants|🌱|venus flytrap
+pitcher_plant|豬籠草|plants|🌱|pitcher plant
+banana_plant|香蕉樹|plants|🍌|banana plant
+rice_plant|稻米植株|plants|🌾|rice plant
+wheat|小麥|plants|🌾|wheat plant
+corn|玉米|plants|🌽|corn plant
+coffee_plant|咖啡樹|plants|☕|coffee plant
+mushroom|蘑菇|fungi|🍄|mushroom
+toadstool|毒菇（外觀類）|fungi|🍄|toadstool
+shiitake|香菇|fungi|🍄|shiitake mushroom
+oyster_mushroom|平菇|fungi|🍄|oyster mushroom
+reishi|靈芝|fungi|🍄|reishi mushroom
+chanterelle|雞油菌|fungi|🍄|chanterelle mushroom
+morel|羊肚菌|fungi|🍄|morel mushroom
+truffle|松露|fungi|🍄|truffle mushroom
+bracket_fungus|多孔菌|fungi|🍄|bracket fungus
+puffball|馬勃菌|fungi|🍄|puffball fungus
+mold|黴菌（可見菌落）|fungi|🧫|mold growing on food
+lichen|地衣|fungi|🌿|lichen on tree bark`;
+for(const line of WORLD_SPECIES_TEXT.split('\n')){
+  const [key,zh,family,emoji,name]=line.split('|');
+  if(!key||!name)continue;
+  SPECIES.push([key,zh,'other',emoji,`a photograph of ${name}`,family]);
+}
+const FAMILY_OVERRIDES = {
+  mammals:'leopard_cat formosan_bear pangolin otter serow yellow_marten macaque wild_boar deer squirrel rabbit raccoon fox mouse',
+  birds:'spoonbill grass_owl hawk_eagle blue_magpie swinhoes_pheasant',
+  reptiles:'snake lizard turtle', amphibians:'frog',insects:'butterfly'
+};
+for(const [family,keys] of Object.entries(FAMILY_OVERRIDES)){
+  for(const key of keys.split(' ')){const s=SPECIES.find(x=>x[0]===key);if(s)s[5]=family;}
+}
+const WORLD_FAMILIES = [
+  ['mammals','哺乳類','a photograph featuring a mammal animal such as a bear, deer, fox or whale'],
+  ['birds','鳥類','a photograph of a bird with feathers and a beak'],
+  ['reptiles','爬蟲類','a photograph of a reptile such as a lizard, snake or turtle'],
+  ['amphibians','兩棲類','a photograph of a frog or salamander amphibian'],
+  ['fish','魚類','an underwater photograph of a fish'],
+  ['insects','昆蟲','a close-up photograph of an insect with six legs'],
+  ['arachnids','蜘蛛及其他蛛形綱','a close-up photograph of a spider, scorpion or tick'],
+  ['crustaceans','甲殼類','a close-up photograph of a crab, shrimp or lobster'],
+  ['mollusks','軟體動物','a photograph of an octopus, squid, snail, clam or shellfish'],
+  ['marine','其他無脊椎動物','a photograph of a jellyfish, coral, sea star, earthworm or centipede'],
+  ['plants','植物','a close-up botanical photograph of a living plant, flower, leaf or tree'],
+  ['fungi','真菌與地衣','a close-up photograph of a fungus, mushroom or lichen']
 ];
 const NEGATIVES = [
   'a photograph of a person', 'a photograph of a pet dog',
@@ -255,8 +494,58 @@ async function loadModel(){
   return state.modelLoading;
 }
 
-const ADVANCED_PROMPTS = SPECIES.map(s=>s[4]).concat(NEGATIVES);
 const PROMPT_TO_SPECIES = new Map(SPECIES.map(s=>[s[4],s]));
+const FAMILY_PROMPTS = WORLD_FAMILIES.map(g=>g[2]);
+const FAMILY_BY_PROMPT = new Map(WORLD_FAMILIES.map(g=>[g[2],g]));
+function customCandidates(){
+  const text=$('customSpecies').value;
+  const names=[...new Set(text.split(/[,，;；\n]+/).map(s=>s.trim()).filter(Boolean))].slice(0,20);
+  const items=[];
+  for(const name of names){
+    const known=SPECIES.find(s=>s[1]===name||s[0].replace(/_/g,' ')===name.toLowerCase()||s[4].toLowerCase().endsWith(name.toLowerCase()));
+    if(known){items.push(known);continue;}
+    const key='custom:'+name.toLowerCase();
+    const label=name.slice(0,60);
+    const prompt=`a clear photograph of ${label}`;
+    const s=[key,label,'other','🔎',prompt,'custom'];
+    LABELS[key]=[label,'other','🔎'];
+    items.push(s);
+  }
+  return items;
+}
+function advancedScopeChanged(){
+  const scope=$('advancedScope').value;
+  $('customScopeBox').hidden=scope!=='custom';
+  $('scopeDescription').textContent=scope==='world'?'廣域模式先判斷哺乳、鳥、魚、蟲、植物等生物大類，再比對內建候選物種；未列入的物種可切換自訂模式。':scope==='taiwan'?'優先比對臺灣保育類與常見野生動物，並使用背景類別降低誤報。':'最多輸入 20 種英文名稱或拉丁學名；模型會在這些候選與背景類別之間比對。';
+  state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=performance.now();
+  state.advancedError=false;
+  if(state.running&&$('advancedToggle').checked){clearTimeout(state.advancedTimer);if(!state.advancedBusy)startAdvanced(state.session);}
+  reflectDetections();
+}
+async function compareAdvanced(model,data){
+  const scope=$('advancedScope').value;
+  let choices;
+  let familyName='';
+  if(scope==='world'){
+    const broadNegatives=NEGATIVES.filter(s=>!s.includes('grass and trees')&&!s.includes('empty forest'));
+    const coarse=await model(data,FAMILY_PROMPTS.concat(broadNegatives));
+    const sorted=[...coarse].sort((a,b)=>b.score-a.score);
+    const family=sorted[0]&&FAMILY_BY_PROMPT.get(sorted[0].label);
+    if(!family||sorted[0].score<0.12)return {results:[],familyName:'大類無法確認'};
+    choices=SPECIES.filter(s=>s[5]===family[0]);
+    familyName=family[1];
+  }else if(scope==='taiwan')choices=SPECIES.slice(0,TAIWAN_SPECIES_COUNT);
+  else{
+    choices=customCandidates();
+    if(!choices.length)return {results:[],familyName:'請先輸入至少一種候選生物'};
+  }
+  if(!choices.length)return {results:[],familyName:'目前沒有候選'};
+  const negatives=(scope==='world'&&familyName==='植物')?NEGATIVES.filter(s=>!s.includes('grass and trees')&&!s.includes('empty forest')):scope==='world'&&familyName==='鳥類'?NEGATIVES.filter(s=>!s.includes('common pigeon')):NEGATIVES;
+  const prompts=choices.map(s=>s[4]).concat(negatives);
+  const predictions=await model(data,prompts);
+  const choicesMap=new Map(choices.map(s=>[s[4],s]));
+  return {results:[...predictions].sort((a,b)=>b.score-a.score),choicesMap,familyName};
+}
 function advancedNote(txt,warning=false){
   const el=$('advancedStatus');el.textContent=txt;el.style.color=warning?'#ffb5ab':'';
 }
@@ -264,7 +553,7 @@ async function loadAdvancedModel(){
   if(state.advancedModel)return state.advancedModel;
   if(!state.advancedLoading){
     state.advancedLoading=(async()=>{
-      advancedNote('正在載入進階模型（初次約 150 MB），可能耗費流量與較長時間…');
+      advancedNote('正在載入進階模型（可能需下載數百 MB），請確認網路及裝置記憶體…');
       const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm');
       return pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{
         dtype:'q8',device:'wasm',
@@ -274,7 +563,7 @@ async function loadAdvancedModel(){
           advancedNote(`進階 AI 模型下載中 ${Math.round(p.progress)}% · 僅供輔助辨識`);
         }
       });
-    })().then(model=>{state.advancedModel=model;advancedNote('進階模型已就緒 · 定期比對疑似野生物種');return model;}).catch(err=>{state.advancedLoading=null;throw err;});
+    })().then(model=>{state.advancedModel=model;advancedNote('進階模型已就緒 · 支援跨門類及自訂物種候選比對');return model;}).catch(err=>{state.advancedLoading=null;throw err;});
   }
   return state.advancedLoading;
 }
@@ -319,25 +608,25 @@ async function startAdvanced(runId){
   try{
     const model=await loadAdvancedModel();
     if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
-    advancedNote('進階模型運作中 · 約每 5 秒比對一次；僅顯示疑似候選');
+    advancedNote('進階模型運作中 · 約每 5 秒比對一次；只提供候選線索');
     const moving=sceneChange();
     const staticFile=$('sourceType').value==='file'&&state.source?.tagName==='IMG';
     const hasAnimal=state.predictions.some(p=>p.class!=='person');
     // The full-scene classifier must not continuously turn an empty static landscape into a "rare animal".
     if(moving)state.lastMotion=performance.now();
-    if(!staticFile&&!hasAnimal&&performance.now()-state.lastMotion>7000){
+    if(!staticFile&&!hasAnimal&&!$('stationaryToggle').checked&&performance.now()-state.lastMotion>7000){
       state.advancedCandidate=null;state.advancedEvidence=null;reflectDetections();return;
     }
     const data=snapshotForAdvanced();if(!data)return;
-    const predictions=await model(data,ADVANCED_PROMPTS);
+    const comparison=await compareAdvanced(model,data);
     if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
-    const sorted=[...predictions].sort((a,b)=>b.score-a.score),best=sorted[0],runner=sorted[1];
-    const candidate=best&&PROMPT_TO_SPECIES.get(best.label);
+    const sorted=comparison.results,best=sorted[0],runner=sorted[1];
+    const candidate=best&&comparison.choicesMap?.get(best.label);
     const minScore=Number($('speciesThreshold').value)/100;
-    const gap=best.score-(runner?.score||0);
-    if(!candidate||best.score<minScore||gap<.07||!wanted({class:candidate[0]})){
+    const gap=best ? best.score-(runner?.score||0) : 0;
+    if(!candidate||best.score<minScore||gap<.05||!wanted({class:candidate[0]})){
       state.advancedCandidate=null;state.advancedEvidence=null;
-      advancedNote('進階比對中 · 目前沒有足夠明確的野生動物候選（不代表環境一定安全）');
+      advancedNote(`進階比對：${comparison.familyName||'候選搜尋'} · 無法確認明確物種（可能不在候選清單中）`);
     }else{
       const prev=state.advancedEvidence;
       const count=prev?.kind===candidate[0]?Math.min(prev.count+1,8):1;
@@ -351,7 +640,7 @@ async function startAdvanced(runId){
           addAlert(candidate[0],best.score,{kind:'advanced',detail:`候選標籤連續比對 ${count} 次；與第二名差距 ${Math.round(gap*100)} 個百分點。需人工複核。`});
         }
       }
-      advancedNote(`進階候選：疑似${candidate[1]}，相對比對分數 ${Math.round(best.score*100)}%，連續 ${count}/2；需人工複核`);
+      advancedNote(`進階候選：${comparison.familyName||'自訂／臺灣'} · 疑似${candidate[1]}，相對比對 ${Math.round(best.score*100)}%，連續 ${count}/2；需人工複核`);
     }
     reflectDetections();
   }catch(err){
@@ -434,14 +723,19 @@ function frame(){
   const dims=getDims();if(!dims)return;
   const [width,height]=dims;
   if(els.canvas.width!==width||els.canvas.height!==height){els.canvas.width=width;els.canvas.height=height;}
-  els.ctx.drawImage(state.source,0,0,width,height);
-  $('resolutionText').textContent=`${width} × ${height}`;
   const pen=els.ctx;
+  const mirrored=$('mirrorToggle').checked;
+  pen.save();
+  if(mirrored){pen.translate(width,0);pen.scale(-1,1);}
+  pen.drawImage(state.source,0,0,width,height);
+  pen.restore();
+  $('resolutionText').textContent=`${width} × ${height}${mirrored?' · 鏡像':''}`;
   for(const p of state.predictions){
     const [x,y,w,h]=p.bbox;
+    const drawX=mirrored?width-x-w:x;
     const name=LABELS[p.class][0];
     const boxWidth=Math.max(2,width/380);
-    pen.lineWidth=boxWidth;pen.strokeStyle=state.tracks.get(p.class)?.confirmed?'#45efc3':'#edcc81';pen.strokeRect(x,y,w,h);
+    pen.lineWidth=boxWidth;pen.strokeStyle=state.tracks.get(p.class)?.confirmed?'#45efc3':'#edcc81';pen.strokeRect(drawX,y,w,h);
     const confirmed=state.tracks.get(p.class)?.confirmed;
     const txt=`${name} · ${Math.round(p.score*100)}% ${confirmed?'已確認':'待連續確認'}`;
     const fontSize=Math.max(15,Math.round(width/65));
@@ -449,8 +743,9 @@ function frame(){
     const tw=pen.measureText(txt).width;
     const labelHeight=fontSize+13;
     const labelTop=Math.max(0,y-labelHeight);
-    pen.fillStyle=confirmed?'#1e6e60e8':'#72612be8';pen.fillRect(x,labelTop,tw+17,labelHeight);
-    pen.fillStyle='#fff';pen.fillText(txt,x+8,labelTop+fontSize+2);
+    const labelX=Math.max(0,Math.min(width-(tw+17),drawX));
+    pen.fillStyle=confirmed?'#1e6e60e8':'#72612be8';pen.fillRect(labelX,labelTop,tw+17,labelHeight);
+    pen.fillStyle='#fff';pen.fillText(txt,labelX+8,labelTop+fontSize+2);
   }
 }
 function drawLoop(runId){
@@ -575,7 +870,7 @@ function beep(){
 }
 function saveHistory(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.history));}catch(_){tell('瀏覽器儲存空間不足，紀錄只會保留在此次開啟期間。',true);}}
 function restoreHistory(){
-  try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(Array.isArray(raw))state.history=raw.filter(x=>x&&LABELS[x.className]).slice(0,200);}catch(_){}
+  try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(Array.isArray(raw))state.history=raw.filter(x=>x&&(LABELS[x.className]||(typeof x.className==='string'&&x.className.startsWith('custom:')))).slice(0,200);}catch(_){}
   renderHistory();
 }
 function renderHistory(){
@@ -584,7 +879,7 @@ function renderHistory(){
   if(!state.history.length){const empty=document.createElement('div');empty.className='log-empty';empty.textContent='目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。';list.append(empty);return;}
   for(const record of state.history){
     const item=document.createElement('div');item.className='log-item';
-    const icon=document.createElement('div');icon.className='log-icon';icon.textContent=LABELS[record.className][2];
+    const icon=document.createElement('div');icon.className='log-icon';icon.textContent=LABELS[record.className]?.[2]||'🔎';
     const desc=document.createElement('div');desc.className='log-description';
     const title=document.createElement('div');title.className='log-title';title.textContent=`${record.protectedCandidate?'⚠ 疑似保育類：':'偵測到'}${record.label}${record.protectedCandidate?'（待人工複核）':''}`;
     const time=document.createElement('div');time.className='log-meta';time.textContent=`${new Date(record.when).toLocaleString('zh-TW',{hour12:false})} · ${record.source||'未知來源'}`;
@@ -615,6 +910,10 @@ function checkNotification(){
   $('notifyBtn').disabled=Notification.permission==='granted';
 }
 $('sourceType').addEventListener('change',()=>{if(state.running)stop();syncSourceFields();});
+$('mirrorToggle').addEventListener('change',()=>{try{localStorage.setItem('biowatch_mirror',String($('mirrorToggle').checked));}catch(_){}});
+$('advancedScope').addEventListener('change',advancedScopeChanged);
+$('customSpecies').addEventListener('change',advancedScopeChanged);
+$('stationaryToggle').addEventListener('change',advancedScopeChanged);
 $('confidence').addEventListener('input',updateSliders);
 $('confirmFrames').addEventListener('input',updateSliders);
 $('speciesThreshold').addEventListener('input',updateSliders);
@@ -630,7 +929,8 @@ Object.values(FILTER_IDS).forEach(id=>$(id).addEventListener('change',()=>{if(st
 window.addEventListener('beforeunload',()=>{if(state.stream)state.stream.getTracks().forEach(t=>t.stop());});
 if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener('devicechange',listDevices);
 if(location.hostname==='localhost'||location.hostname==='127.0.0.1')$('networkUrl').placeholder=location.origin+'/stream';
-restoreHistory();syncSourceFields();updateSliders();checkNotification();listDevices();
+try{const savedMirror=localStorage.getItem('biowatch_mirror');if(savedMirror!==null)$('mirrorToggle').checked=savedMirror==='true';}catch(_){}
+restoreHistory();syncSourceFields();updateSliders();advancedScopeChanged();checkNotification();listDevices();
 
 </script>
 </body>
