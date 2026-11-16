@@ -41,7 +41,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V4.0 · PRECISION</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V4.1 · ULTRA STRICT</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -85,22 +85,22 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
        </section>
        <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">DETECTION RULES</div><h3>辨識與警報設定</h3></div></div>
        <label for="precisionProfile" class="field-label">AI 可靠度模式</label>
-        <select id="precisionProfile"><option value="strict" selected>高精準（推薦：優先降低誤報）</option><option value="balanced">平衡（一般環境）</option><option value="sensitive">高靈敏（快速經過的目標）</option></select>
-        <p class="hint" id="precisionExplain">高精準：較高門檻、4 次連續追蹤與影格分數平滑；可能漏掉快速經過或低光源的動物。</p>
-        <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">75%</strong></div><input id="confidence" type="range" min="40" max="90" step="5" value="75"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
-       <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">4 次</strong></div><input id="confirmFrames" type="range" min="2" max="6" step="1" value="4"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
+        <select id="precisionProfile"><option value="strict" selected>極嚴格驗證（每次預設）</option><option value="balanced">平衡（一般環境）</option><option value="sensitive">高靈敏（快速經過的目標）</option></select>
+        <p class="hint" id="precisionExplain">極嚴格預設：80% 模型門檻、連續 5 次且至少 1 秒觀察，進階物種雙視角驗證；可能漏掉快速經過的生物。</p>
+        <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">80%</strong></div><input id="confidence" type="range" min="40" max="95" step="5" value="80"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
+       <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">5 次</strong></div><input id="confirmFrames" type="range" min="2" max="8" step="1" value="5"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
        <div class="range-heading cooldown-heading"><label for="cooldown" class="field-label">同類警報冷卻時間</label><strong id="cooldownValue">15 秒</strong></div><input id="cooldown" type="range" min="5" max="120" step="5" value="15"><div class="range-ends"><span>5 秒</span><span>120 秒</span></div>
        <div class="subheading">想要警示的生物類別</div>
        <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
        <div class="divider"></div>
-        <label class="toggle-line"><span><strong>跨物種進階辨識（實驗）</strong><small>支援廣域大分類與自訂物種候選；模型需另行下載，大小與速度依裝置而異。</small></span><input type="checkbox" id="advancedToggle" role="switch"></label>
+        <label class="toggle-line"><span><strong>跨物種進階辨識（實驗）</strong><small>支援廣域大分類與自訂物種候選；模型需另行下載，大小與速度依裝置而異。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
         <label for="advancedScope" class="field-label">進階辨識範圍</label>
         <select id="advancedScope"><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
         <p class="scope-explain" id="scopeDescription">全球模式採「大類 → 候選物種」兩階段比對，候選物種並非全世界完整名錄，結果只代表影像相似的可能性。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
         <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
-        <p class="hint" id="advancedStatus" aria-live="polite">未啟用。一般辨識仍使用 COCO-SSD；啟用後會下載 CLIP 模型。</p><p class="hint" id="precisionStatus" aria-live="polite">V4.0 新增：逐個體追蹤、連續確認、模糊畫面拒判與保育類多次驗證。模型分數不是實際正確率。</p>
-       <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">24%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="24"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
+        <p class="hint" id="advancedStatus" aria-live="polite">預設開啟進階物種比對（實驗）；首次需下載大型模型。若裝置效能不足，可手動停用。</p><p class="hint" id="precisionStatus" aria-live="polite">V4.1：永遠預設極嚴格模式；逐目標追蹤、時間確認、影像品質檢查、保育類雙視角與多次驗證。模型分數不是正確率。</p>
+       <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
        <button id="notifyBtn" class="outline-full">啟用桌面通知</button><p class="hint" id="notifyStatus">桌面通知依瀏覽器與作業系統支援情況而定。</p>
@@ -761,6 +761,31 @@ function imageQuality(){
     return {good:true,brightness,detail};
   }catch(_){return {good:false,reason:'無法讀取影像品質（可能受跨來源限制）'};}
 }
+// Independently re-check a species candidate after horizontally mirroring the cropped image.
+// This is a consistency test, NOT an independent model or a calibrated probability.
+async function checkSecondView(model,source,best,ranked,runId){
+  if($('precisionProfile').value!=='strict')return true;
+  const sample=new Image();
+  sample.src=source;
+  await sample.decode();
+  if(!state.running||runId!==state.session)return false;
+  const canvas=document.createElement('canvas');
+  canvas.width=224;canvas.height=224;
+  const ctx=canvas.getContext('2d');
+  ctx.translate(224,0);ctx.scale(-1,1);
+  ctx.drawImage(sample,0,0,224,224);
+  // Compare the original top candidates plus hard negative descriptions on a transformed view.
+  const alternatives=ranked.filter(item=>item.label!==best.label && !NEGATIVES.includes(item.label))
+    .slice(0,4).map(item=>item.label);
+  const prompts=[best.label,...alternatives,...NEGATIVES];
+  const evidence=await model(canvas.toDataURL('image/jpeg',.9),prompts);
+  if(!state.running||runId!==state.session)return false;
+  const scores=[...evidence].sort((a,b)=>b.score-a.score);
+  const winner=scores[0];
+  return Boolean(winner?.label===best.label
+    && winner.score>=(NEGATIVES.length+alternatives.length>10?.17:.20)
+    && winner.score-(scores[1]?.score||0)>=.07);
+}
 async function startAdvanced(runId){
   if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
   if(state.advancedBusy||state.advancedError)return;
@@ -777,7 +802,7 @@ async function startAdvanced(runId){
       const quality=imageQuality();
       if(!quality.good){
         state.advancedCandidate=null;state.advancedEvidence=null;
-        advancedNote('高精準拒判：'+quality.reason);
+        advancedNote('極嚴格拒判：'+quality.reason);
         reflectDetections();return;
       }
     }
@@ -794,19 +819,22 @@ async function startAdvanced(runId){
     const profile=$('precisionProfile').value;
     const isProtected=candidate?.[2]==='protected';
     const minScore=Math.max(Number($('speciesThreshold').value)/100,
-      profile==='strict'?(isProtected?.30:.24):profile==='balanced'?.18:.12);
-    const minGap=profile==='strict'?(isProtected?.13:.095):profile==='balanced'?.07:.045;
+      profile==='strict'?(isProtected?.34:.28):profile==='balanced'?.18:.12);
+    const minGap=profile==='strict'?(isProtected?.14:.11):profile==='balanced'?.07:.045;
     const gap=best ? best.score-(runner?.score||0) : 0;
     if(!candidate||best.score<minScore||gap<minGap||!wanted({class:candidate[0]})){
       state.advancedCandidate=null;state.advancedEvidence=null;
       advancedNote(`進階比對：${comparison.familyName||'候選搜尋'} · 無法確認明確物種（可能不在候選清單中）`);
+    }else if(!(await checkSecondView(model,data,best,sorted,runId))){
+      state.advancedCandidate=null;state.advancedEvidence=null;
+      advancedNote('極嚴格拒判：鏡像第二視角結果不一致，保留為無法確認');
     }else{
       const prev=state.advancedEvidence;
       const count=prev?.kind===candidate[0]?Math.min(prev.count+1,8):1;
       const wasAlerted=prev?.kind===candidate[0]&&prev.alerted;
       const item={kind:candidate[0],score:best.score,count,protected:candidate[2]==='protected',alerted:wasAlerted};
       state.advancedEvidence=item;state.advancedCandidate=item;
-      const required=$('precisionProfile').value==='strict'?3:2;
+      const required=$('precisionProfile').value==='strict'?4:2;
       if(count>=required&&!wasAlerted){
         const now=performance.now(),last=state.lastAlert.get(candidate[0])||-Infinity;
         if(now-last>Number($('cooldown').value)*1000){
@@ -911,7 +939,7 @@ function frame(){
     const boxWidth=Math.max(2,width/380);
     pen.lineWidth=boxWidth;pen.strokeStyle=state.tracks.get(p.trackId)?.confirmed?'#45efc3':'#edcc81';pen.strokeRect(drawX,y,w,h);
     const confirmed=state.tracks.get(p.trackId)?.confirmed;
-    const txt=`${name} · ${Math.round(p.score*100)}% ${confirmed?'已確認':'待連續確認'}`;
+    const txt=`${name} · ${Math.round(p.score*100)}% ${confirmed?'多次確認':'待驗證'}`;
     const fontSize=Math.max(15,Math.round(width/65));
     pen.font=`600 ${fontSize}px system-ui,"Noto Sans TC",sans-serif`;
     const tw=pen.measureText(txt).width;
@@ -997,7 +1025,8 @@ function updateTracks(now){
     const id=old?old.id:state.nextTrackId++;
     const count=(old?.count||0)+1;
     const average=old?old.average*.6+p.score*.4:p.score;
-    const confirmed=count>=Number($('confirmFrames').value)&&average>=threshold;
+    const minDuration=$('precisionProfile').value==='strict'?1000:0;
+    const confirmed=count>=Number($('confirmFrames').value)&&average>=threshold&&now-(old?.arrivalAt||now)>=minDuration;
     const track={id,kind:p.class,when:now,bbox:p.bbox,count,average,score:p.score,
       confirmed,alerted:old?.alerted||false,arrivalAt:old?.arrivalAt||now};
     state.tracks.set(id,track);p.trackId=id;
@@ -1020,7 +1049,7 @@ function reflectDetections(){
   });
   if(advanced){
     const meta=LABELS[advanced.kind];
-    const chip=makeChip(`${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/${$('precisionProfile').value==='strict'?3:2} 次 · 待人工複核`,'detect-chip '+(advanced.protected?'protected':'provisional'));
+    const chip=makeChip(`${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/${$('precisionProfile').value==='strict'?4:2} 次 · 待人工複核`,'detect-chip '+(advanced.protected?'protected':'provisional'));
     chips.append(chip);
   }
 }
@@ -1114,10 +1143,10 @@ $('customSpecies').addEventListener('change',advancedScopeChanged);
 $('stationaryToggle').addEventListener('change',advancedScopeChanged);
 $('precisionProfile').addEventListener('change',()=>{
   const p=$('precisionProfile').value;
-  const presets=p==='strict'?[75,4,24]:p==='balanced'?[65,3,18]:[50,2,12];
+  const presets=p==='strict'?[80,5,26]:p==='balanced'?[65,3,18]:[50,2,12];
   $('confidence').value=String(presets[0]);$('confirmFrames').value=String(presets[1]);
   $('speciesThreshold').value=String(presets[2]);
-  $('precisionExplain').textContent=p==='strict'?'高精準：4 次跨影格確認，嚴格的物種拒判和低畫質過濾；較易漏報。':p==='balanced'?'平衡：3 次影格確認，兼顧誤報與漏報。':'高靈敏：2 次影格確認，適合快速經過目標；可能增加誤報。';
+  $('precisionExplain').textContent=p==='strict'?'極嚴格：80% 模型門檻、5 次且至少 1 秒跨影格確認，保育類雙視角複核；可能漏報。':p==='balanced'?'平衡：3 次影格確認，兼顧誤報與漏報。':'高靈敏：2 次影格確認，適合快速經過目標；可能增加誤報。';
   state.tracks.clear();state.advancedEvidence=null;state.advancedCandidate=null;
   updateSliders();reflectDetections();
 });
@@ -1137,6 +1166,18 @@ window.addEventListener('beforeunload',()=>{if(state.stream)state.stream.getTrac
 if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener('devicechange',listDevices);
 if(location.hostname==='localhost'||location.hostname==='127.0.0.1')$('networkUrl').placeholder=location.origin+'/stream';
 try{const savedMirror=localStorage.getItem('biowatch_mirror');if(savedMirror!==null)$('mirrorToggle').checked=savedMirror==='true';}catch(_){}
+// Set ultra-strict every fresh load and bfcache restore. Manual changes during a session remain possible.
+function setUltraStrictDefault(){
+  $('precisionProfile').value='strict';
+  $('confidence').value='80';
+  $('confirmFrames').value='5';
+  $('speciesThreshold').value='26';
+  $('stationaryToggle').checked=false;
+  $('advancedToggle').checked=true;
+  updateSliders();
+}
+setUltraStrictDefault();
+window.addEventListener('pageshow',(event)=>{if(event.persisted)setUltraStrictDefault();});
 restoreHistory();syncSourceFields();updateSliders();advancedScopeChanged();checkNotification();listDevices();
 
 
