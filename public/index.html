@@ -48,7 +48,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V5.2 · VERIFIED DISPLAY</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V6.0 · SIX SPECIES</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -98,17 +98,27 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
         <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">80%</strong></div><input id="confidence" type="range" min="40" max="95" step="5" value="80"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
        <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">5 次</strong></div><input id="confirmFrames" type="range" min="2" max="8" step="1" value="5"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
        <div class="range-heading cooldown-heading"><label for="cooldown" class="field-label">同類警報冷卻時間</label><strong id="cooldownValue">15 秒</strong></div><input id="cooldown" type="range" min="5" max="120" step="5" value="15"><div class="range-ends"><span>5 秒</span><span>120 秒</span></div>
-       <div class="subheading">想要警示的生物類別</div>
-       <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
+       <div class="subheading" id="sixTargetTitle">指定六種動物（預設全選）</div>
+        <div class="check-grid" id="sixTargetChecks">
+          <label class="check"><input id="focusCivet" type="checkbox" checked><span>🦨 麝香貓</span></label>
+          <label class="check"><input id="focusPangolin" type="checkbox" checked><span>🦔 穿山甲</span></label>
+          <label class="check"><input id="focusMongoose" type="checkbox" checked><span>🦦 食蟹獴</span></label>
+          <label class="check"><input id="focusMasked" type="checkbox" checked><span>🦝 白鼻心</span></label>
+          <label class="check"><input id="focusCat" type="checkbox" checked><span>🐱 貓</span></label>
+          <label class="check"><input id="focusDog" type="checkbox" checked><span>🐶 狗</span></label>
+        </div>
+        <p class="hint" id="focusWarning">貓、狗使用即時物件偵測；其他四種屬進階 AI 疑似候選，無法保證鑑定正確。</p>
+        <div class="subheading" id="legacyTitle" hidden>其他生物類別（實驗）</div>
+       <div class="check-grid" id="legacyFilters" hidden><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
        <div class="divider"></div>
-        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>預設僅在一般模型確認動物後才比對物種；不等於專業物種鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch"></label>
+        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>六類模式可針對移動區域補充推測四種野生動物，首次需下載額外模型；不等於正式鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
         <label class="toggle-line"><span><strong>讓疑似物種直接發出警報（實驗）</strong><small>預設關閉。CLIP 不是經校準的物種辨識器，建議先人工複核候選結果。</small></span><input type="checkbox" id="speciesAlertToggle" role="switch"></label>
         <label for="advancedScope" class="field-label">進階辨識範圍</label>
-        <select id="advancedScope"><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
-        <p class="scope-explain" id="scopeDescription">全球模式採「大類 → 候選物種」兩階段比對，候選物種並非全世界完整名錄，結果只代表影像相似的可能性。</p>
+        <select id="advancedScope"><option value="six" selected>專用六類：麝香貓、穿山甲、食蟹獴、白鼻心、貓、狗</option><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
+        <p class="scope-explain" id="scopeDescription">六類模式：先判斷動物目標，再比對麝香貓、穿山甲、食蟹獴、白鼻心、貓及狗。不能確認時拒絕猜測。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
         <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
-        <p class="hint" id="advancedStatus" aria-live="polite">候選分析預設關閉，以優先確保一般偵測穩定；需要時可手動開啟（實驗）。</p><p class="hint" id="precisionStatus" aria-live="polite">V5.2：模型載入逾時與備援、只顯示通過驗證的目標；進階物種推測預設關閉，尚需實際影像評測。</p>
+        <p class="hint" id="advancedStatus" aria-live="polite">六類候選分析預設開啟，但只在出現動物或移動區域時才載入；貓狗一般模型會先運行。</p><p class="hint" id="precisionStatus" aria-live="polite">V6.0：指定六類辨識。貓狗使用即時模型；麝香貓、穿山甲、食蟹獴與白鼻心仍需專家確認。</p>
        <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
@@ -472,6 +482,30 @@ for(const line of WORLD_SPECIES_TEXT.split('\n')){
   if(!key||!name)continue;
   SPECIES.push([key,zh,'other',emoji,`a photograph of ${name}`,family]);
 }
+// Six requested categories: 4 provisional wildlife classes + 2 COCO supported pets.
+const FOCUS_SPECIES = [
+  ['small_indian_civet','麝香貓','protected','🦨','a trail camera photograph of a small Indian civet (Viverricula indica), spotted and striped gray-brown coat and long ringed tail','mammals'],
+  ['pangolin','穿山甲','protected','🦔','a trail camera photograph of a Chinese pangolin (Manis pentadactyla), overlapping brown scales on its back and tail','mammals'],
+  ['crab_mongoose','食蟹獴','protected','🦦','a trail camera photograph of a crab-eating mongoose (Urva urva or Herpestes urva), dark brown fur and long pale cheek stripes','mammals'],
+  ['masked_palm_civet','白鼻心','protected','🦝','a trail camera photograph of a masked palm civet (Paguma larvata), dark face with white mask and pale nose markings','mammals'],
+  ['cat','貓','pets','🐱','a photograph of a domestic cat, Felis catus','mammals'],
+  ['dog','狗','pets','🐶','a photograph of a domestic dog, Canis lupus familiaris','mammals']
+];
+for(const species of FOCUS_SPECIES){if(!SPECIES.some(s=>s[0]===species[0]))SPECIES.push(species);}
+const FOCUS_NEGATIVES = [
+  'a trail camera photo of a ferret badger (Melogale moschata)',
+  'a trail camera photo of a leopard cat (Prionailurus bengalensis)',
+  'a photo of a yellow-throated marten',
+  'a photo of a raccoon with a dark mask',
+  'a photo of a wild boar',
+  'a photo of a squirrel',
+  'a photo of a fox',
+  'an empty night forest trail with no animal',
+  'branches and leaves moving on an empty forest trail',
+  'a trail camera image of a person',
+  'a photograph of an animal toy or statue'
+];
+const FOCUS_FILTER_IDS = {small_indian_civet:'focusCivet',pangolin:'focusPangolin',crab_mongoose:'focusMongoose',masked_palm_civet:'focusMasked',cat:'focusCat',dog:'focusDog'};
 const FAMILY_OVERRIDES = {
   mammals:'leopard_cat formosan_bear pangolin otter serow yellow_marten macaque wild_boar deer squirrel rabbit raccoon fox mouse',
   birds:'spoonbill grass_owl hawk_eagle blue_magpie swinhoes_pheasant',
@@ -543,7 +577,13 @@ function updateSliders(){
   $('confirmFramesValue').textContent=$('confirmFrames').value+' 次';
   $('speciesThresholdValue').textContent=$('speciesThreshold').value+'%';
 }
-function wanted(p){const meta=LABELS[p.class];return Boolean(meta&&$(FILTER_IDS[meta[1]])?.checked);}
+function wanted(p){
+  if($('advancedScope').value==='six'){
+    const id=FOCUS_FILTER_IDS[p.class];
+    return Boolean(id&&$(id)?.checked);
+  }
+  const meta=LABELS[p.class];return Boolean(meta&&$(FILTER_IDS[meta[1]])?.checked);
+}
 function getDims(){
   if(!state.source) return null;
   const el=state.source;
@@ -713,7 +753,9 @@ function customCandidates(){
 function advancedScopeChanged(){
   const scope=$('advancedScope').value;
   $('customScopeBox').hidden=scope!=='custom';
-  $('scopeDescription').textContent=scope==='world'?'廣域模式先判斷哺乳、鳥、魚、蟲、植物等生物大類，再比對內建候選物種；未列入的物種可切換自訂模式。':scope==='taiwan'?'優先比對臺灣保育類與常見野生動物，並使用背景類別降低誤報。':'最多輸入 20 種英文名稱或拉丁學名；模型會在這些候選與背景類別之間比對。';
+  $('sixTargetChecks').hidden=scope!=='six';$('sixTargetTitle').hidden=scope!=='six';$('focusWarning').hidden=scope!=='six';
+  $('legacyTitle').hidden=scope==='six';$('legacyFilters').hidden=scope==='six';
+  $('scopeDescription').textContent=scope==='six'?'只比對指定六種動物與相似物種排除項；麝香貓、穿山甲、食蟹獴、白鼻心為疑似候選，必須人工複核。':scope==='world'?'廣域模式先判斷哺乳、鳥、魚、蟲、植物等生物大類，再比對內建候選物種；未列入的物種可切換自訂模式。':scope==='taiwan'?'優先比對臺灣保育類與常見野生動物，並使用背景類別降低誤報。':'最多輸入 20 種英文名稱或拉丁學名；模型會在這些候選與背景類別之間比對。';
   state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=performance.now();
   state.advancedError=false;
   if(state.running&&$('advancedToggle').checked){clearTimeout(state.advancedTimer);if(!state.advancedBusy)startAdvanced(state.session);}
@@ -723,7 +765,10 @@ async function compareAdvanced(model,data){
   const scope=$('advancedScope').value;
   let choices;
   let familyName='';
-  if(scope==='world'){
+  if(scope==='six'){
+    choices=FOCUS_SPECIES.filter(s=>wanted({class:s[0]}));
+    familyName='六種指定動物';
+  }else if(scope==='world'){
     const broadNegatives=NEGATIVES.filter(s=>!s.includes('grass and trees')&&!s.includes('empty forest'));
     const coarse=await model(data,FAMILY_PROMPTS.concat(broadNegatives));
     const sorted=[...coarse].sort((a,b)=>b.score-a.score);
@@ -739,7 +784,7 @@ async function compareAdvanced(model,data){
     if(!choices.length)return {results:[],familyName:'請先輸入至少一種候選生物'};
   }
   if(!choices.length)return {results:[],familyName:'目前沒有候選'};
-  const negatives=(scope==='world'&&familyName==='植物')?NEGATIVES.filter(s=>!s.includes('grass and trees')&&!s.includes('empty forest')):scope==='world'&&familyName==='鳥類'?NEGATIVES.filter(s=>!s.includes('common pigeon')):NEGATIVES;
+  const negatives=scope==='six'?FOCUS_NEGATIVES:(scope==='world'&&familyName==='植物')?NEGATIVES.filter(s=>!s.includes('grass and trees')&&!s.includes('empty forest')):scope==='world'&&familyName==='鳥類'?NEGATIVES.filter(s=>!s.includes('common pigeon')):NEGATIVES;
   const prompts=choices.map(s=>s[4]).concat(negatives);
   const predictions=await model(data,prompts);
   const choicesMap=new Map(choices.map(s=>[s[4],s]));
@@ -839,15 +884,16 @@ async function checkSecondView(model,source,best,ranked,runId){
   ctx.translate(224,0);ctx.scale(-1,1);
   ctx.drawImage(sample,0,0,224,224);
   // Compare the original top candidates plus hard negative descriptions on a transformed view.
-  const alternatives=ranked.filter(item=>item.label!==best.label && !NEGATIVES.includes(item.label))
+  const negatives=$('advancedScope').value==='six'?FOCUS_NEGATIVES:NEGATIVES;
+  const alternatives=ranked.filter(item=>item.label!==best.label && !negatives.includes(item.label))
     .slice(0,4).map(item=>item.label);
-  const prompts=[best.label,...alternatives,...NEGATIVES];
+  const prompts=[best.label,...alternatives,...negatives];
   const evidence=await model(canvas.toDataURL('image/jpeg',.9),prompts);
   if(!state.running||runId!==state.session)return false;
   const scores=[...evidence].sort((a,b)=>b.score-a.score);
   const winner=scores[0];
   return Boolean(winner?.label===best.label
-    && winner.score>=(NEGATIVES.length+alternatives.length>10?.17:.20)
+    && winner.score>=(negatives.length+alternatives.length>10?.17:.20)
     && winner.score-(scores[1]?.score||0)>=.07);
 }
 async function startAdvanced(runId){
@@ -1277,6 +1323,10 @@ function checkNotification(){
 $('sourceType').addEventListener('change',()=>{if(state.running)stop();syncSourceFields();});
 $('mirrorToggle').addEventListener('change',()=>{try{localStorage.setItem('biowatch_mirror',String($('mirrorToggle').checked));}catch(_){}});
 $('advancedScope').addEventListener('change',advancedScopeChanged);
+Object.values(FOCUS_FILTER_IDS).forEach(id=>$(id).addEventListener('change',()=>{
+  state.advancedCandidate=null;state.advancedEvidence=null;state.predictions=state.predictions.filter(wanted);
+  reflectDetections();
+}));
 $('customSpecies').addEventListener('change',advancedScopeChanged);
 $('stationaryToggle').addEventListener('change',advancedScopeChanged);
 $('debugPredictions').addEventListener('change',()=>{
@@ -1319,7 +1369,8 @@ function setUltraStrictDefault(){
   $('confirmFrames').value='5';
   $('speciesThreshold').value='26';
   $('stationaryToggle').checked=false;
-  $('advancedToggle').checked=false;
+  $('advancedScope').value='six';
+  $('advancedToggle').checked=true;
   $('speciesAlertToggle').checked=false;
   $('debugPredictions').checked=false;
   updateSliders();
