@@ -61,10 +61,10 @@ el('start').addEventListener('click',async()=>{
  try{
    if(!runtime){
      say('正在載入 Python 計算引擎…');
-     if(!window.loadPyodide)await loadScript('https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js');
+     if(!window.loadPyodide)await Promise.race([loadScript('https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js'),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Python 引擎下載逾時，請檢查網路或阻擋擴充功能')),45000))]);
      runtime=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.29.4/full/'});
      say('正在下載 NumPy、OpenCV、scikit-learn，首次需要較多時間…');
-     await runtime.loadPackage(['numpy','opencv-python','pillow','scikit-learn','joblib']);
+     await Promise.race([runtime.loadPackage(['numpy','opencv-python','pillow','scikit-learn','joblib']),new Promise((_,reject)=>setTimeout(()=>reject(new Error('科學運算套件下載超過 2 分鐘，請切換網路重試')),120000))]);
      await runtime.runPythonAsync(el('python-code').textContent);
    }
    const sig=modelFile.name+':'+modelFile.size+':'+modelFile.lastModified;
