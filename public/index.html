@@ -48,7 +48,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V5.0 · VERIFIED FIRST</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V5.1 · STABLE LOADING</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -100,14 +100,14 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
        <div class="subheading">想要警示的生物類別</div>
        <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
        <div class="divider"></div>
-        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>預設僅在一般模型確認動物後才比對物種；不等於專業物種鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
+        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>預設僅在一般模型確認動物後才比對物種；不等於專業物種鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch"></label>
         <label class="toggle-line"><span><strong>讓疑似物種直接發出警報（實驗）</strong><small>預設關閉。CLIP 不是經校準的物種辨識器，建議先人工複核候選結果。</small></span><input type="checkbox" id="speciesAlertToggle" role="switch"></label>
         <label for="advancedScope" class="field-label">進階辨識範圍</label>
         <select id="advancedScope"><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
         <p class="scope-explain" id="scopeDescription">全球模式採「大類 → 候選物種」兩階段比對，候選物種並非全世界完整名錄，結果只代表影像相似的可能性。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
         <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
-        <p class="hint" id="advancedStatus" aria-live="polite">候選分析預設啟用，但須先有可信動物目標；物種自動警報預設關閉。</p><p class="hint" id="precisionStatus" aria-live="polite">V5.0：先確認動物存在，再提供疑似物種。空景不猜物種，疑似物種不自動警報；可在紀錄中標記誤判。</p>
+        <p class="hint" id="advancedStatus" aria-live="polite">候選分析預設關閉，以優先確保一般偵測穩定；需要時可手動開啟（實驗）。</p><p class="hint" id="precisionStatus" aria-live="polite">V5.1：模型載入故障會提示原因與重試；全球物種候選預設不載入、不自動警報。仍需真實影像驗證錯誤率。</p>
        <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
@@ -121,8 +121,9 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
   <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。</footer>
  </div>
  <div class="toast" id="toast" role="status" aria-live="polite"></div>
- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-<script>
+ <script>
+// AI model dependencies are lazy-loaded with timeout and CDN fallback.
+
 // Google Identity Services (button only). Credentials are verified by the Worker.
 // This is intentionally optional: camera detection and local history continue without login.
 (function initBioWatchGoogleAuth(){
@@ -224,7 +225,6 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 })();
 
 </script>
- <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
  <script>
 'use strict';
 
@@ -625,15 +625,66 @@ async function openNetwork(runId){
   if(runId!==state.session)return;
   state.source=els.image;
 }
+function bounded(promise,ms,label){
+  let timer;
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label+'逾時（'+Math.ceil(ms/1000)+' 秒）')),ms);})
+  ]).finally(()=>clearTimeout(timer));
+}
+function modelProgress(title,detail){
+  $('stageEmpty').querySelector('strong').textContent=title;
+  $('stageEmpty').querySelector('p').textContent=detail;
+  updateStatus('busy',title);
+}
+async function downloadScript(urls,check,label){
+  if(check())return;
+  let lastError=null;
+  for(const url of urls){
+    if(check())return;
+    modelProgress('正在載入 '+label+'…','如果 CDN 無回應，會自動改用備用來源；不會無限等待。');
+    const script=document.createElement('script');
+    script.async=true;script.src=url;
+    try{
+      await bounded(new Promise((resolve,reject)=>{
+        script.onload=resolve;
+        script.onerror=()=>reject(new Error('無法下載 '+label+'，來源：'+new URL(url).hostname));
+        document.head.appendChild(script);
+      }),14000,label+'下載');
+      if(!check())throw new Error(label+'載入後沒有提供預期 API');
+      return;
+    }catch(error){
+      lastError=error;
+      script.remove();script.onload=null;script.onerror=null;
+      if(check())return;
+    }
+  }
+  throw new Error(label+'下載失敗：'+(lastError?.message||'未知問題')+'。請檢查網路、廣告阻擋或 CDN 存取。');
+}
 async function loadModel(){
   if(state.model)return state.model;
   if(!state.modelLoading){
     state.modelLoading=(async()=>{
-      if(!window.tf||!window.cocoSsd)throw new Error('AI 程式庫載入失敗，請檢查網路連線，或關閉攔截 CDN 的擴充功能。');
-      // Prioritize predictable performance on mobile devices.
-      try { await tf.setBackend('webgl'); } catch(_) { await tf.setBackend('cpu'); }
-      await tf.ready();
-      return cocoSsd.load({base:'mobilenet_v2'});
+      await downloadScript([
+        'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js',
+        'https://unpkg.com/@tensorflow/tfjs@4.22.0/dist/tf.min.js'
+      ],()=>Boolean(window.tf),'TensorFlow.js');
+      await downloadScript([
+        'https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js',
+        'https://unpkg.com/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js'
+      ],()=>Boolean(window.cocoSsd),'COCO-SSD');
+      modelProgress('正在啟動 AI 運算引擎…','正在初始化 WebGL；若失敗會嘗試 CPU 備援。');
+      let backendOK=false;
+      try { backendOK=await bounded(tf.setBackend('webgl'),9000,'WebGL 初始化'); }
+      catch(err){console.warn('WebGL 初始化失敗',err);}
+      if(!backendOK){
+        modelProgress('改用 CPU 備援中…','裝置圖形處理器不支援或初始化失敗。');
+        await bounded(tf.setBackend('cpu'),9000,'CPU 初始化');
+      }
+      await bounded(tf.ready(),9000,'AI 運算引擎準備');
+      modelProgress('正在下載與初始化辨識模型…','首次下載可能較久；超時會顯示錯誤，可按「開始偵測」重試。');
+      const model=await bounded(cocoSsd.load({base:'mobilenet_v2'}),55000,'COCO-SSD 模型初始化');
+      return model;
     })().then(model=>{state.model=model;return model;}).catch(err=>{state.modelLoading=null;throw err;});
   }
   return state.modelLoading;
@@ -898,13 +949,12 @@ async function start(){
     else if(mode==='file')await openFile(runId);
     else await openNetwork(runId);
     if(runId!==state.session)return;
-    $('stageEmpty').querySelector('strong').textContent='正在載入 AI 辨識模型…';
-    $('stageEmpty').querySelector('p').textContent='首次啟用會下載模型，需連接網路';
-    updateStatus('busy','AI 模型載入中…');
+    modelProgress('準備載入 AI 模型…','將先檢查程式庫，再下載模型；若卡住會顯示具體原因。');
     await loadModel();
     if(runId!==state.session)return;
     $('stageEmpty').hidden=true;$('overlay').style.display='block';$('stageFooter').hidden=false;
-    $('detectorText').textContent='COCO-SSD · 個體追蹤／影格確認';
+    $('detectorText').textContent='COCO-SSD · '+(window.tf?.getBackend?.()||'運算中')+' · 個體追蹤';
+    $('startBtn').textContent='▶　開始偵測';
     updateStatus('running','偵測運作中');
     drawLoop(runId);
     detectLoop(runId);
@@ -915,9 +965,11 @@ async function start(){
     console.error(error);
     stop(false);
     updateStatus('error','啟動失敗');
-    tell(friendlyError(error),true);
-    $('stageEmpty').querySelector('strong').textContent='無法啟動';
-    $('stageEmpty').querySelector('p').textContent='請檢查來源與權限後重試';
+    const reason=friendlyError(error);
+    tell(reason,true);
+    $('stageEmpty').querySelector('strong').textContent='AI 啟動失敗，可再試一次';
+    $('stageEmpty').querySelector('p').textContent=reason+'。可嘗試關閉阻擋擴充功能、切換網路後再點「開始偵測」。';
+    $('startBtn').textContent='↻ 重新啟動 AI';
   }
 }
 function stop(changeStatus=true){
@@ -1260,7 +1312,7 @@ function setUltraStrictDefault(){
   $('confirmFrames').value='5';
   $('speciesThreshold').value='26';
   $('stationaryToggle').checked=false;
-  $('advancedToggle').checked=true;
+  $('advancedToggle').checked=false;
   $('speciesAlertToggle').checked=false;
   updateSliders();
 }
