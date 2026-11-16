@@ -48,7 +48,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V5.1 · STABLE LOADING</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V5.2 · VERIFIED DISPLAY</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -91,7 +91,8 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
         <div class="divider"></div><label class="toggle-line"><span><strong>鏡像畫面（水平翻轉）</strong><small>預設開啟；只翻轉畫面和偵測框，中文標籤不會變成反字，截圖也會鏡像。</small></span><input id="mirrorToggle" type="checkbox" role="switch" checked></label>
        </section>
        <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">DETECTION RULES</div><h3>辨識與警報設定</h3></div></div>
-       <label for="precisionProfile" class="field-label">AI 可靠度模式</label>
+       <label class="toggle-line"><span><strong>顯示尚未確認的偵測框（除錯）</strong><small>預設關閉；只有連續追蹤驗證的目標會顯示在主畫面。開啟可查看原始候選與框線。</small></span><input type="checkbox" id="debugPredictions" role="switch"></label>
+        <label for="precisionProfile" class="field-label">AI 可靠度模式</label>
         <select id="precisionProfile"><option value="strict" selected>極嚴格驗證（每次預設）</option><option value="balanced">平衡（一般環境）</option><option value="sensitive">高靈敏（快速經過的目標）</option></select>
         <p class="hint" id="precisionExplain">極嚴格：先驗證物體有移動、尺寸足夠，再經多影格確認；物種只是候選、預設不發警報。可能漏掉靜止或非常小的生物。</p>
         <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">80%</strong></div><input id="confidence" type="range" min="40" max="95" step="5" value="80"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
@@ -107,7 +108,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
         <p class="scope-explain" id="scopeDescription">全球模式採「大類 → 候選物種」兩階段比對，候選物種並非全世界完整名錄，結果只代表影像相似的可能性。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
         <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
-        <p class="hint" id="advancedStatus" aria-live="polite">候選分析預設關閉，以優先確保一般偵測穩定；需要時可手動開啟（實驗）。</p><p class="hint" id="precisionStatus" aria-live="polite">V5.1：模型載入故障會提示原因與重試；全球物種候選預設不載入、不自動警報。仍需真實影像驗證錯誤率。</p>
+        <p class="hint" id="advancedStatus" aria-live="polite">候選分析預設關閉，以優先確保一般偵測穩定；需要時可手動開啟（實驗）。</p><p class="hint" id="precisionStatus" aria-live="polite">V5.2：模型載入逾時與備援、只顯示通過驗證的目標；進階物種推測預設關閉，尚需實際影像評測。</p>
        <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
@@ -1005,6 +1006,8 @@ function frame(){
   pen.restore();
   $('resolutionText').textContent=`${width} × ${height}${mirrored?' · 鏡像':''}`;
   for(const p of state.predictions){
+    const verified=Boolean(state.tracks.get(p.trackId)?.confirmed);
+    if(!verified&&!$('debugPredictions').checked)continue;
     const [x,y,w,h]=p.bbox;
     const drawX=mirrored?width-x-w:x;
     const name=LABELS[p.class][0];
@@ -1158,12 +1161,12 @@ function updateTracks(now){
   }
 }
 function reflectDetections(){
-  const records=state.predictions;
+  const records=state.predictions.filter(p=>state.tracks.get(p.trackId)?.confirmed||$('debugPredictions').checked);
   const advanced=state.advancedCandidate;
   $('currentCount').innerHTML=`${records.filter(p=>state.tracks.get(p.trackId)?.confirmed).length} <span>已確認個體</span>`;
   const chips=$('detectedChips');chips.replaceChildren();
   if(!records.length&&!advanced){chips.append(makeChip('目前沒有通過設定門檻的目標','empty-chip'));$('detectedSummary').textContent='沒有目標';return;}
-  $('detectedSummary').textContent=`一般偵測 ${records.length} 個${advanced?' · 進階候選 1 種':''}`;
+  $('detectedSummary').textContent=`已通過驗證 ${records.filter(p=>state.tracks.get(p.trackId)?.confirmed).length} 個${$('debugPredictions').checked?' · 顯示待驗證':''}${advanced?' · 物種待複核 1 種':''}`;
   records.forEach(p=>{
     const meta=LABELS[p.class], track=state.tracks.get(p.trackId);
     const chip=makeChip(`${meta[2]} ${meta[0]} · 模型分數 ${Math.round(p.score*100)}% · ${track?.confirmed?'連續確認':'待驗證 '+(track?.count||1)+'/'+$('confirmFrames').value+'（含移動檢查）'}`,'detect-chip'+(track?.confirmed?'':' provisional'));
@@ -1276,6 +1279,10 @@ $('mirrorToggle').addEventListener('change',()=>{try{localStorage.setItem('biowa
 $('advancedScope').addEventListener('change',advancedScopeChanged);
 $('customSpecies').addEventListener('change',advancedScopeChanged);
 $('stationaryToggle').addEventListener('change',advancedScopeChanged);
+$('debugPredictions').addEventListener('change',()=>{
+  reflectDetections();
+  if($('debugPredictions').checked)tell('已顯示 AI 原始待驗證候選，這些框不代表確認有生物。');
+});
 $('precisionProfile').addEventListener('change',()=>{
   const p=$('precisionProfile').value;
   const presets=p==='strict'?[80,5,26]:p==='balanced'?[65,3,18]:[50,2,12];
@@ -1314,6 +1321,7 @@ function setUltraStrictDefault(){
   $('stationaryToggle').checked=false;
   $('advancedToggle').checked=false;
   $('speciesAlertToggle').checked=false;
+  $('debugPredictions').checked=false;
   updateSliders();
 }
 setUltraStrictDefault();
