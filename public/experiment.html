@@ -1,0 +1,96 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BioWatch｜七類實驗模型測試</title><style>
+:root{color-scheme:dark;font-family:system-ui,"Noto Sans TC",sans-serif;background:#0b121c;color:#edf7f5}*{box-sizing:border-box}body{margin:0}main{max-width:880px;margin:auto;padding:30px 18px}a{color:#6ee7d4}h1{font-size:30px}.muted{color:#afc2ce;line-height:1.75}.panel{border:1px solid #35465a;border-radius:15px;padding:23px;background:#182433;margin:20px 0}.warn{background:#3b3327;border-left:3px solid #edc376;padding:15px;line-height:1.7}.label{display:block;margin:19px 0 8px;font-weight:700}input[type=file]{padding:13px;width:100%;border:1px dashed #6e8e88;border-radius:9px;background:#11212c;color:#e2eeee}button{border:0;padding:12px 18px;border-radius:8px;background:#40dec0;color:#082219;font-weight:750;cursor:pointer}button:disabled{opacity:.5}#preview{max-width:100%;max-height:350px;display:none;margin:17px auto;border-radius:9px}#status{padding:15px;background:#101e2a;border-radius:8px;line-height:1.6;white-space:pre-wrap}#results{display:none}.row{display:grid;grid-template-columns:92px 1fr 64px;gap:10px;align-items:center;margin:12px 0;font-size:13px}.bar{height:10px;border-radius:10px;background:#344353;overflow:hidden}.fill{height:100%;background:#41d5b8}.small{font-size:12px;color:#a9bbca}
+</style></head><body><main>
+<p><a href="/">← 返回 BioWatch 正式即時監控</a></p><h1>七類動物實驗模型｜照片測試</h1>
+<p class="muted">使用你提供的照片訓練出來的 Python 模型，在瀏覽器內辨識單張照片。照片及模型僅在本機處理，不會送往網站伺服器。</p>
+<div class="warn"><strong>注意：測試正確率只有 45.9%（61 張保留照片中的 28 張）。</strong>這是整張照片分類器，不是動物定位模型，無法直接取代即時監控，也不會觸發警報。任何物種結論均需人工複核。</div>
+<section class="panel"><h2>載入模型及測試照片</h2>
+<p><a href="https://drive.google.com/file/d/1_de80PclKUPpsbastrhf3Zfoy9-xL1y2/view?usp=drivesdk" target="_blank" rel="noopener">① 下載 BioWatch 實驗模型 ZIP（約 5.1 MB）</a></p>
+<label class="label" for="model">② 選擇剛下載的 ZIP（或內含的 .joblib）</label><input id="model" type="file" accept=".zip,.joblib">
+<label class="label" for="photo">③ 選擇需要測試的照片</label><input id="photo" type="file" accept="image/*">
+<img id="preview" alt="待測試照片">
+<p><button id="start">開始實驗辨識</button></p>
+<p id="status" role="status" aria-live="polite">請先選取模型及照片。第一次按開始會下載 Python 的科學運算套件，需要網路及較多記憶體。</p></section>
+<section id="results" class="panel"><h2>分類結果（僅供實驗）</h2><h3 id="decision"></h3><div id="scores"></div>
+<p class="small">「背景與其他」也是模型分類之一；百分比是模型輸出，不代表真正物種辨識正確率。</p></section>
+<script id="python-code" type="text/plain">
+import io,json,zipfile,numpy as np,cv2,joblib
+from PIL import Image,ImageOps
+CLASSES=['麝香貓','穿山甲','食蟹獴','白鼻心','鼬獾','貓','狗','背景與其他']
+HOG=cv2.HOGDescriptor((96,96),(16,16),(8,8),(8,8),9)
+def load_model(filename):
+    content=open(filename,'rb').read()
+    if filename.endswith('.zip'):
+        with zipfile.ZipFile(io.BytesIO(content)) as z:
+            names=[s for s in z.namelist() if s.endswith('biowatch_eight_class_experimental.joblib')]
+            if len(names)!=1:raise ValueError('ZIP 中找不到正確的模型檔')
+            content=z.read(names[0])
+    global model
+    model=joblib.load(io.BytesIO(content))
+    if model.n_features_in_!=4836:raise ValueError('模型格式與特徵數量不相符')
+def classify(filename):
+    with Image.open(filename) as image:
+        image=ImageOps.exif_transpose(image).convert('RGB')
+        image.thumbnail((96,96))
+        canvas=Image.new('RGB',(96,96),(127,127,127))
+        canvas.paste(image,((96-image.width)//2,(96-image.height)//2))
+        rgb=np.array(canvas,dtype=np.uint8)
+    bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
+    gray=cv2.cvtColor(rgb,cv2.COLOR_RGB2GRAY)
+    hog=HOG.compute(gray).reshape(-1).astype('float32')
+    hsv_image=cv2.cvtColor(bgr,cv2.COLOR_BGR2HSV)
+    hsv=np.concatenate([np.histogram(hsv_image[:,:,i],bins=16,range=(0,256))[0].astype('float32') for i in range(3)])
+    hsv/=hsv.sum()+1e-6
+    tiny=cv2.resize(rgb,(12,12),interpolation=cv2.INTER_AREA).astype('float32')/255
+    feature=np.concatenate([hog,hsv*30,tiny.reshape(-1)*.04]).astype('float32')
+    prob=model.predict_proba(feature[None,:])[0]
+    return json.dumps({name:float(prob[i]) for i,name in enumerate(CLASSES)},ensure_ascii=False)
+</script>
+<script>
+'use strict';
+const el=id=>document.getElementById(id);
+let runtime=null,signature='';
+const say=t=>el('status').textContent=t;
+const loadScript=url=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=url;s.onload=resolve;s.onerror=()=>reject(new Error('無法載入 Python 引擎（可能被網路或擴充功能阻擋）'));document.head.append(s)});
+el('photo').addEventListener('change',()=>{const f=el('photo').files[0];if(f){el('preview').src=URL.createObjectURL(f);el('preview').style.display='block'}});
+el('start').addEventListener('click',async()=>{
+ const modelFile=el('model').files[0],photoFile=el('photo').files[0];
+ if(!modelFile||!photoFile){say('請先選擇模型 ZIP 及要測試的照片。');return}
+ if(!/\.zip$|\.joblib$/i.test(modelFile.name)){say('模型必須是本專案提供的 ZIP 或 joblib。');return}
+ el('start').disabled=true;el('results').style.display='none';
+ try{
+   if(!runtime){
+     say('正在載入 Python 計算引擎…');
+     if(!window.loadPyodide)await loadScript('https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js');
+     runtime=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.29.4/full/'});
+     say('正在下載 NumPy、OpenCV、scikit-learn，首次需要較多時間…');
+     await runtime.loadPackage(['numpy','opencv-python','pillow','scikit-learn','joblib']);
+     await runtime.runPythonAsync(el('python-code').textContent);
+   }
+   const sig=modelFile.name+':'+modelFile.size+':'+modelFile.lastModified;
+   if(signature!==sig){
+     say('正在載入你信任的 BioWatch 實驗模型…');
+     const filename=modelFile.name.toLowerCase().endsWith('.zip')?'/tmp/bw.zip':'/tmp/bw.joblib';
+     runtime.FS.writeFile(filename,new Uint8Array(await modelFile.arrayBuffer()));
+     runtime.globals.set('model_path',filename);
+     await runtime.runPythonAsync('load_model(model_path)');signature=sig;
+   }
+   say('正在分類照片…');
+   runtime.FS.writeFile('/tmp/bw_photo',new Uint8Array(await photoFile.arrayBuffer()));
+   const result=JSON.parse(await runtime.runPythonAsync("classify('/tmp/bw_photo')"));
+   const order=Object.entries(result).sort((a,b)=>b[1]-a[1]);
+   el('decision').textContent=order[0][1]>=.6?'疑似 '+order[0][0]+'（仍需人工確認）':'無法可靠確認物種；最高候選為 '+order[0][0];
+   el('scores').replaceChildren();
+   for(const [name,value] of order){
+     const row=document.createElement('div');row.className='row';
+     const label=document.createElement('span');label.textContent=name;
+     const bar=document.createElement('div');bar.className='bar';
+     const fill=document.createElement('div');fill.className='fill';fill.style.width=(value*100)+'%';bar.append(fill);
+     const pct=document.createElement('span');pct.textContent=(value*100).toFixed(1)+'%';
+     row.append(label,bar,pct);el('scores').append(row);
+   }
+   el('results').style.display='block';say('照片測試完成。不影響正式監控或警報。');
+ }catch(e){console.error(e);say('無法完成測試：'+(e.message||e)+'。請確認網路與 ZIP 檔；若版本不相容，請使用 ZIP 內的 Python 程式。')}
+ finally{el('start').disabled=false}
+});
+</script></main></body></html>
