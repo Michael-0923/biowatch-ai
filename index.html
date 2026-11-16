@@ -141,6 +141,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
   async function requestJSON(path, options={}) {
     const response=await fetch(path,{credentials:'same-origin',cache:'no-store',...options});
     const data=await response.json().catch(()=>({error:'伺服器沒有回應'}));
+    if (response.status===404 && path.startsWith('/api/auth/')) throw new Error('Google 登入 API 尚未部署：請先恢復 Cloudflare 的 GitHub 連線，重新部署 main 分支。');
     if (!response.ok) throw new Error(data.error||'登入服務發生錯誤');
     return data;
   }
