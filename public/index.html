@@ -36,6 +36,13 @@
 html:fullscreen{background:var(--bg);overflow:auto}
 html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 @media(max-width:680px){.fullscreen-page-btn{font-size:11px;padding:7px}.top-status{flex-wrap:wrap}.stage-fullscreen-exit{font-size:12px;padding:10px 12px}}
+/* Manual event review: labels are local-only, not model training data. */
+.review-help{margin:0 22px 10px!important;color:#a3b7c9}
+.log-review-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.review-btn{font-size:11px;border:1px solid #426072;background:#1b3042;color:#d3ebf4;border-radius:8px;padding:4px 8px}
+.review-btn[aria-pressed="true"]{border-color:#57dfb7;color:#b1ffe4;background:#1b4a3e}
+.review-btn.false[aria-pressed="true"]{border-color:#f59f95;color:#ffe7d9;background:#5b3535}
+@media(max-width:680px){.log-item{flex-wrap:wrap}.log-review-actions{width:100%}}
 </style>
 </head>
 <body>
@@ -86,7 +93,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
        <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">DETECTION RULES</div><h3>辨識與警報設定</h3></div></div>
        <label for="precisionProfile" class="field-label">AI 可靠度模式</label>
         <select id="precisionProfile"><option value="strict" selected>極嚴格驗證（每次預設）</option><option value="balanced">平衡（一般環境）</option><option value="sensitive">高靈敏（快速經過的目標）</option></select>
-        <p class="hint" id="precisionExplain">極嚴格預設：80% 模型門檻、連續 5 次且至少 1 秒觀察，進階物種雙視角驗證；可能漏掉快速經過的生物。</p>
+        <p class="hint" id="precisionExplain">極嚴格：先驗證物體有移動、尺寸足夠，再經多影格確認；物種只是候選、預設不發警報。可能漏掉靜止或非常小的生物。</p>
         <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">80%</strong></div><input id="confidence" type="range" min="40" max="95" step="5" value="80"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
        <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">5 次</strong></div><input id="confirmFrames" type="range" min="2" max="8" step="1" value="5"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
        <div class="range-heading cooldown-heading"><label for="cooldown" class="field-label">同類警報冷卻時間</label><strong id="cooldownValue">15 秒</strong></div><input id="cooldown" type="range" min="5" max="120" step="5" value="15"><div class="range-ends"><span>5 秒</span><span>120 秒</span></div>
@@ -971,6 +978,45 @@ function drawLoop(runId){
   }
   state.raf=requestAnimationFrame(()=>drawLoop(runId));
 }
+// Compare successive low-resolution frames. This is a conservative motion gate,
+// not a substitute for a dedicated animal detector.
+function motionEvidence(){
+  try {
+    const dims=getDims();if(!dims)return null;
+    const c=document.createElement('canvas');c.width=96;c.height=54;
+    const g=c.getContext('2d',{willReadFrequently:true});
+    g.drawImage(state.source,0,0,96,54);
+    const rgba=g.getImageData(0,0,96,54).data;
+    const gray=new Uint8Array(96*54);
+    for(let i=0;i<gray.length;i++){
+      const k=4*i;
+      gray[i]=Math.round(.2126*rgba[k]+.7152*rgba[k+1]+.0722*rgba[k+2]);
+    }
+    const last=state.motionFrame;state.motionFrame=gray;
+    if(!last)return null;
+    const mask=new Uint8Array(gray.length);
+    let changed=0;
+    for(let i=0;i<gray.length;i++){
+      if(Math.abs(gray[i]-last[i])>=22){mask[i]=1;changed++;}
+    }
+    return {mask,width:96,height:54,ratio:changed/gray.length,sourceWidth:dims[0],sourceHeight:dims[1]};
+  }catch(_){return null;}
+}
+function regionMoved(bbox,info){
+  // A still-image upload is a one-frame test, not motion surveillance.
+  if($('sourceType').value==='file'&&state.source?.tagName==='IMG')return true;
+  if(!info||info.ratio>.48)return false; // camera shake/exposure jump
+  const [x,y,w,h]=bbox;
+  const x0=Math.max(0,Math.floor(x/info.sourceWidth*info.width));
+  const y0=Math.max(0,Math.floor(y/info.sourceHeight*info.height));
+  const x1=Math.min(info.width,Math.ceil((x+w)/info.sourceWidth*info.width));
+  const y1=Math.min(info.height,Math.ceil((y+h)/info.sourceHeight*info.height));
+  let total=0,changed=0;
+  for(let yy=y0;yy<y1;yy++)for(let xx=x0;xx<x1;xx++){
+    changed+=info.mask[yy*info.width+xx];total++;
+  }
+  return total>=6&&changed>=3&&changed/total>=.045;
+}
 async function detectLoop(runId){
   if(!state.running||runId!==state.session)return;
   try{
@@ -978,7 +1024,15 @@ async function detectLoop(runId){
       const startTime=performance.now();
       const results=await state.model.detect(state.source,20,Number($('confidence').value)/100);
       if(!state.running||runId!==state.session)return;
-      state.predictions=results.filter(wanted);
+      const dims=getDims(),strict=$('precisionProfile').value==='strict';
+      const movement=motionEvidence();
+      state.predictions=results.filter(p=>{
+        if(!wanted(p))return false;
+        if(!strict||!dims)return true;
+        const [x,y,w,h]=p.bbox;
+        return w>=12&&h>=12&&w*h/(dims[0]*dims[1])>=.0016;
+      });
+      for(const p of state.predictions)p.hasMotion=regionMoved(p.bbox,movement);
       updateTracks(performance.now());
       const now=performance.now();
       const elapsed=Math.max(1,now-startTime);
@@ -1039,9 +1093,12 @@ function updateTracks(now){
     const count=(old?.count||0)+1;
     const average=old?old.average*.6+p.score*.4:p.score;
     const minDuration=$('precisionProfile').value==='strict'?1000:0;
-    const confirmed=count>=Number($('confirmFrames').value)&&average>=threshold&&now-(old?.arrivalAt||now)>=minDuration;
+    const motionSeen=Boolean(old?.motionSeen||p.hasMotion);
+    const confirmed=count>=Number($('confirmFrames').value)&&average>=threshold
+      &&now-(old?.arrivalAt||now)>=minDuration
+      &&($('precisionProfile').value!=='strict'||motionSeen);
     const track={id,kind:p.class,when:now,bbox:p.bbox,count,average,score:p.score,
-      confirmed,alerted:old?.alerted||false,arrivalAt:old?.arrivalAt||now};
+      motionSeen,confirmed,alerted:old?.alerted||false,arrivalAt:old?.arrivalAt||now};
     state.tracks.set(id,track);p.trackId=id;
   });
   for(const [id,old] of state.tracks){
@@ -1057,7 +1114,7 @@ function reflectDetections(){
   $('detectedSummary').textContent=`一般偵測 ${records.length} 個${advanced?' · 進階候選 1 種':''}`;
   records.forEach(p=>{
     const meta=LABELS[p.class], track=state.tracks.get(p.trackId);
-    const chip=makeChip(`${meta[2]} ${meta[0]} · 模型分數 ${Math.round(p.score*100)}% · ${track?.confirmed?'連續確認':'待確認 '+(track?.count||1)+'/'+$('confirmFrames').value}`,'detect-chip'+(track?.confirmed?'':' provisional'));
+    const chip=makeChip(`${meta[2]} ${meta[0]} · 模型分數 ${Math.round(p.score*100)}% · ${track?.confirmed?'連續確認':'待驗證 '+(track?.count||1)+'/'+$('confirmFrames').value+'（含移動檢查）'}`,'detect-chip'+(track?.confirmed?'':' provisional'));
     chips.append(chip);
   });
   if(advanced){
@@ -1073,7 +1130,7 @@ function decideAlerts(now){
     const lastAlarm=state.lastAlert.get(kind)||-Infinity;
     if(now-lastAlarm<=Number($('cooldown').value)*1000)continue;
     state.lastAlert.set(kind,now);track.alerted=true;
-    addAlert(kind,track.average,{kind:'standard',detail:`目標 #${track.id}：連續辨識 ${track.count} 次；平滑模型分數 ${Math.round(track.average*100)}%`});
+    addAlert(kind,track.average,{kind:'standard',detail:`目標 #${track.id}：連續辨識 ${track.count} 次；平滑模型分數 ${Math.round(track.average*100)}%；移動目標核驗 ${track.motionSeen?'通過':'未通過'}`});
   }
 }
 function addAlert(kind,score,extra={kind:'standard',detail:''}){
@@ -1123,13 +1180,26 @@ function renderHistory(){
     const desc=document.createElement('div');desc.className='log-description';
     const title=document.createElement('div');title.className='log-title';title.textContent=`${record.protectedCandidate?'⚠ 疑似保育類：':'偵測到'}${record.label}${record.protectedCandidate?'（待人工複核）':''}`;
     const time=document.createElement('div');time.className='log-meta';time.textContent=`${new Date(record.when).toLocaleString('zh-TW',{hour12:false})} · ${record.source||'未知來源'}`;
-    const score=document.createElement('div');score.className='score-tag';score.textContent=`${record.score}% · ${record.scoreType||'模型分數'}`;desc.append(title,time);item.append(icon,desc,score);list.append(item);
+    const score=document.createElement('div');score.className='score-tag';score.textContent=`${record.score}% · ${record.scoreType||'模型分數'}`;
+    const actions=document.createElement('div');actions.className='log-review-actions';
+    for(const [value,label] of [['correct','✓ 判斷正確'],['false','✕ 這次是誤判']]){
+      const btn=document.createElement('button');btn.type='button';
+      btn.className='review-btn'+(value==='false'?' false':'');
+      btn.textContent=label;btn.setAttribute('aria-pressed',String(record.review===value));
+      btn.addEventListener('click',()=>{
+        record.review=record.review===value?'':value;
+        saveHistory();renderHistory();
+        tell(record.review==='false'?'已標記為誤判（僅儲存於本機，可匯出 CSV）。':'已更新人工複核結果。');
+      });
+      actions.append(btn);
+    }
+    desc.append(title,time,actions);item.append(icon,desc,score);list.append(item);
   }
 }
 function csvExport(){
   if(!state.history.length){tell('目前沒有可以匯出的紀錄。');return;}
   const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
-  const rows=[['偵測時間','類別','分數 (%)','分數意義','疑似保育類(待人工複核)','來源','確認資訊'],...state.history.map(x=>[new Date(x.when).toLocaleString('zh-TW',{hour12:false}),x.label,x.score,x.scoreType||'模型分數',x.protectedCandidate?'是':'否',x.source,x.detail||''])];
+  const rows=[['偵測時間','類別','分數 (%)','分數意義','疑似保育類(待人工複核)','來源','確認資訊','人工複核'],...state.history.map(x=>[new Date(x.when).toLocaleString('zh-TW',{hour12:false}),x.label,x.score,x.scoreType||'模型分數',x.protectedCandidate?'是':'否',x.source,x.detail||'',x.review==='false'?'誤判':x.review==='correct'?'正確':'未複核'])];
   const blob=new Blob(['\ufeff'+rows.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
   downloadBlob(blob,'BioWatch_警報紀錄_'+new Date().toISOString().slice(0,10)+'.csv');
 }
@@ -1159,7 +1229,7 @@ $('precisionProfile').addEventListener('change',()=>{
   const presets=p==='strict'?[80,5,26]:p==='balanced'?[65,3,18]:[50,2,12];
   $('confidence').value=String(presets[0]);$('confirmFrames').value=String(presets[1]);
   $('speciesThreshold').value=String(presets[2]);
-  $('precisionExplain').textContent=p==='strict'?'極嚴格：80% 模型門檻、5 次且至少 1 秒跨影格確認，保育類雙視角複核；可能漏報。':p==='balanced'?'平衡：3 次影格確認，兼顧誤報與漏報。':'高靈敏：2 次影格確認，適合快速經過目標；可能增加誤報。';
+  $('precisionExplain').textContent=p==='strict'?'極嚴格：移動與尺寸檢查、80% 模型分數、5 次且至少 1 秒確認；疑似物種預設不直接警報。':p==='balanced'?'平衡：3 次影格確認，兼顧誤報與漏報。':'高靈敏：2 次影格確認，適合快速經過目標；可能增加誤報。';
   state.tracks.clear();state.advancedEvidence=null;state.advancedCandidate=null;
   updateSliders();reflectDetections();
 });
