@@ -31,3 +31,33 @@ Worker name: `biowatch-ai`; `wrangler.jsonc`:
 {"name":"biowatch-ai","compatibility_date":"2026-11-16","assets":{"directory":"./public"}}
 ```
 部署指令：`npx wrangler deploy`。修改正式網站請更新 **`public/index.html`** 並提交至 `main`，必要時在 Cloudflare → Workers & Pages → biowatch-ai → 部署確認最新 commit。
+
+
+## Google 登入（V3.1 新增，需完成 Google Cloud 設定）
+
+BioWatch 已新增 Google Identity Services 按鈕、登入帳號/頭像、登出，以及 Cloudflare Worker 伺服端驗證 Google 簽章的 ID token。登入目前是**選用功能**，沒有雲端帳號資料庫，也不會自動將本機警報紀錄同步到其他裝置。登入權杖透過 `HttpOnly; Secure; SameSite=Lax` cookie 保存，最長約 58 分鐘（依 Google ID token 有效期更短），到期須重新登入。
+
+### 1. 建立 Google OAuth 2.0 網頁用戶端 ID
+1. 開啟 https://console.cloud.google.com/auth/clients ，登入並選擇/建立 Google Cloud 專案。
+2. 在 Google Auth Platform 完成 Branding 與 Audience（品牌/受眾）初始化。若保持 Testing 測試模式，請將允許登入的 Google 帳號加入 Test users；對外開放前請依 Google 要求設定正式發布。
+3. 到 Clients 建立 OAuth client，類型選 **Web application**。
+4. 在 **Authorized JavaScript origins** 增加**不含結尾斜線**：
+   `https://biowatch-ai.michael09230923.workers.dev`
+5. 儲存並複製 **Client ID**，格式類似 `1234567890-abc.apps.googleusercontent.com`。
+6. 此處採用 Google 官方 GIS JavaScript callback popup 流程，因此不需額外設定 redirect URI。
+
+### 2. 在 Cloudflare Worker 設定變數
+1. 進入 https://dash.cloudflare.com/ → Workers & Pages → `biowatch-ai` → Settings（設定）。
+2. 在 **Variables and Secrets（變數與密鑰）** 按 Add（新增）。
+3. 新增 **Text** 變數，名稱必須完全一致：`GOOGLE_CLIENT_ID`。
+4. Value 填入上一段的 Google OAuth **Client ID**（**不是** Client Secret），然後選 Deploy/儲存並部署。
+5. 到 Deployments 確認最新版成功，刷新網站即可出現 Google 官方登入按鈕。
+
+注意：無需提供 Google 帳戶密碼或用戶端密鑰給聊天機器人。Google OAuth Client ID 是公開的用戶端識別碼，Client Secret 不能放到前端或 GitHub。
+
+### 程式部署與安全
+- `src/worker.js`：只處理 `/api/auth/*`，在 Worker 透過 Google 公開 JWK 驗證 RS256 JWT 簽章，以及 aud/iss/exp/email_verified。
+- `wrangler.jsonc`：`main: ./src/worker.js`，`assets.run_worker_first: ['/api/auth/*']`，其他網址仍由 `public/` 靜態資產服務。
+- `/api/auth/config` 和 `/api/auth/session` 可供確認配置；未設 Client ID 時會回應 `configured:false`，**不是登入故障**。
+- 登入功能只顯示帳號狀態，不會自動將監控畫面、紀錄或 Google 個人資料傳給第三方資料庫。模型仍依既有 CDN 與本機推論機制運作。
+- 本專案沒有完全鎖住網站：不登入仍可進行生物偵測。若未來需要「一定要登入才能看監控」、雲端紀錄與跨裝置同步，需另行設計存取控制與資料庫。
