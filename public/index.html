@@ -13,13 +13,34 @@
 
 
 #advancedScope,#customSpecies{width:100%} #customScopeBox[hidden]{display:none} #customScopeBox{margin-top:12px;border:1px solid #344456;padding:12px;border-radius:10px;background:#101926} #customSpecies{border:1px solid #37465a;background:#101926;border-radius:9px;color:#d9e3f0;padding:10px;min-height:42px} .scope-explain{font-size:11px;color:#9fb3c7;line-height:1.7;margin:10px 0 12px}.mirror-note{font-size:11px;color:#8ea4ba;margin-top:-5px;margin-bottom:12px}
+
+/* Google sign-in: optional account identity, does not change local camera privacy */
+.topbar{flex-wrap:wrap}
+.auth-panel{display:flex;align-items:center;gap:10px;justify-content:flex-end;margin-left:auto;min-height:44px;max-width:100%;flex-wrap:wrap}
+.auth-google-button{min-height:40px}
+.auth-google-button[hidden],.auth-user[hidden],.auth-status[hidden],.auth-user img[hidden]{display:none!important}
+.auth-user{display:flex;align-items:center;gap:8px;padding:5px 7px;border:1px solid #345667;border-radius:12px;background:#172638}
+.auth-user img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid #4b7585}
+.auth-name{font-size:12px;color:#d8f8ee;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.auth-logout{font-size:11px;padding:5px 10px}
+.auth-status{font-size:11px;color:#8fa6bd;max-width:250px;line-height:1.45}
+@media(max-width:680px){.auth-panel{width:100%;justify-content:flex-start;margin:0 0 10px}.topbar{padding-top:10px}.auth-name{max-width:180px}}
 </style>
 </head>
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V3.0 · WORLD BIODIVERSITY</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V3.1 · GOOGLE SIGN-IN</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span></div>
+    <section class="auth-panel" aria-label="Google 帳號登入">
+      <div id="googleAuthButton" class="auth-google-button" hidden></div>
+      <div id="googleAuthUser" class="auth-user" hidden>
+        <img id="googleAuthAvatar" alt="" referrerpolicy="no-referrer" hidden>
+        <span id="googleAuthName" class="auth-name"></span>
+        <button type="button" class="secondary auth-logout" id="googleAuthLogout">登出</button>
+      </div>
+      <span id="googleAuthStatus" class="auth-status" aria-live="polite">Google 登入初始化中…</span>
+    </section>
   </header>
   <main>
    <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">鏡像鏡頭 · 全球廣域生物候選辨識 <span>↗</span></div></section>
@@ -78,7 +99,107 @@
   <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。</footer>
  </div>
  <div class="toast" id="toast" role="status" aria-live="polite"></div>
- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js">
+// Google Identity Services (button only). Credentials are verified by the Worker.
+// This is intentionally optional: camera detection and local history continue without login.
+(function initBioWatchGoogleAuth(){
+  const status = document.getElementById('googleAuthStatus');
+  const loginHost = document.getElementById('googleAuthButton');
+  const userHost = document.getElementById('googleAuthUser');
+  const name = document.getElementById('googleAuthName');
+  const avatar = document.getElementById('googleAuthAvatar');
+  const logout = document.getElementById('googleAuthLogout');
+  let initialized = false;
+  function message(s) { status.textContent=s;status.hidden=false; }
+  function signedIn(user) {
+    if (!user) {
+      userHost.hidden = true;
+      loginHost.hidden = false;
+      avatar.hidden = true;
+      name.textContent='';
+      return;
+    }
+    name.textContent = user.name || user.email || 'Google 使用者';
+    if (typeof user.picture==='string' && user.picture.startsWith('https://')) {
+      avatar.src = user.picture; avatar.hidden=false;
+    } else {
+      avatar.removeAttribute('src'); avatar.hidden=true;
+    }
+    userHost.hidden=false; loginHost.hidden=true; status.hidden=true;
+  }
+  async function requestJSON(path, options={}) {
+    const response=await fetch(path,{credentials:'same-origin',cache:'no-store',...options});
+    const data=await response.json().catch(()=>({error:'伺服器沒有回應'}));
+    if (!response.ok) throw new Error(data.error||'登入服務發生錯誤');
+    return data;
+  }
+  async function onCredential(response) {
+    if (!response?.credential) {message('Google 未提供登入憑證，請再試一次');return;}
+    message('正在驗證 Google 帳號…');
+    try {
+      const data=await requestJSON('/api/auth/google',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({credential:response.credential})
+      });
+      signedIn(data.user);
+      status.hidden=true;
+    }catch(err){
+      message('登入未完成：'+err.message);
+      loginHost.hidden=false;
+    }
+  }
+  async function prepareGoogle(clientId) {
+    if (initialized) return;
+    if (!window.google?.accounts?.id) {
+      await new Promise((resolve,reject)=>{
+        const el=document.createElement('script');
+        el.src='https://accounts.google.com/gsi/client';
+        el.async=true;
+        el.onload=resolve;
+        el.onerror=()=>reject(new Error('無法載入 Google 官方登入程式'));
+        document.head.appendChild(el);
+      });
+    }
+    if (!window.google?.accounts?.id) throw new Error('Google 登入元件不可用');
+    window.google.accounts.id.initialize({client_id:clientId,callback:onCredential,auto_select:false,ux_mode:'popup'});
+    window.google.accounts.id.renderButton(loginHost,{
+      type:'standard',theme:'outline',size:'large',text:'signin_with',
+      shape:'rectangular',logo_alignment:'left',width:210
+    });
+    initialized=true;
+  }
+  logout.addEventListener('click',async ()=>{
+    logout.disabled=true;
+    try{
+      await requestJSON('/api/auth/logout',{method:'POST'});
+      try{window.google?.accounts?.id?.disableAutoSelect()}catch(_){}
+      signedIn(null);
+      message('已登出 BioWatch（原本的本機警報紀錄仍會保留）');
+    }catch(err){message('登出失敗：'+err.message);}
+    finally{logout.disabled=false;}
+  });
+  (async()=>{
+    try {
+      const session=await requestJSON('/api/auth/session');
+      if(!session.configured){
+        loginHost.hidden=true;
+        message('Google 登入待設定 OAuth 用戶端 ID；目前可繼續使用生物偵測。');
+        return;
+      }
+      const config=await requestJSON('/api/auth/config');
+      if(!config.clientId){message('尚未取得 Google OAuth 設定');return;}
+      await prepareGoogle(config.clientId);
+      signedIn(session.authenticated ? session.user : null);
+      if(!session.authenticated)message('使用 Google 帳號登入（登入不會自動同步警報紀錄）');
+    }catch(err){
+      loginHost.hidden=true;
+      message('Google 登入暫時不可用：'+err.message);
+    }
+  })();
+})();
+
+</script>
  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
  <script>
 'use strict';
