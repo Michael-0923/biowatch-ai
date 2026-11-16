@@ -25,13 +25,24 @@
 .auth-logout{font-size:11px;padding:5px 10px}
 .auth-status{font-size:11px;color:#8fa6bd;max-width:250px;line-height:1.45}
 @media(max-width:680px){.auth-panel{width:100%;justify-content:flex-start;margin:0 0 10px}.topbar{padding-top:10px}.auth-name{max-width:180px}}
+
+/* BioWatch V3.2: native fullscreen, independent of camera resolution and mirroring. */
+.fullscreen-page-btn{font-size:12px;padding:7px 11px;white-space:nowrap}
+.stage-fullscreen-exit{display:none;position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:12;background:#142636e8;color:#eafff7;border:1px solid #80d5c7;border-radius:10px;padding:11px 16px;box-shadow:0 5px 25px #0008;cursor:pointer}
+#videoStage:fullscreen,#videoStage:-webkit-full-screen{width:100vw;height:100dvh;height:100vh;margin:0;border:0;border-radius:0;max-width:none;aspect-ratio:auto;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#videoStage:fullscreen canvas,#videoStage:-webkit-full-screen canvas{width:100%;height:100%;object-fit:contain}
+#videoStage:fullscreen .stage-fullscreen-exit,#videoStage:-webkit-full-screen .stage-fullscreen-exit{display:block}
+#videoStage:fullscreen .stage-footer,#videoStage:-webkit-full-screen .stage-footer{padding:16px 20px;font-size:12px}
+html:fullscreen{background:var(--bg);overflow:auto}
+html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
+@media(max-width:680px){.fullscreen-page-btn{font-size:11px;padding:7px}.top-status{flex-wrap:wrap}.stage-fullscreen-exit{font-size:12px;padding:10px 12px}}
 </style>
 </head>
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V3.1 · GOOGLE SIGN-IN</div><h1>AI 生物偵測警報系統</h1></div></div>
-    <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V3.2 · FULLSCREEN</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
       <div id="googleAuthUser" class="auth-user" hidden>
@@ -52,7 +63,7 @@
    <div class="main-layout">
     <section class="panel video-panel" aria-labelledby="previewHeading">
      <div class="panel-head"><div><div class="panel-kicker">CAMERA FEED</div><h3 id="previewHeading">即時鏡頭畫面</h3></div><div class="live-pill" id="livePill"><span class="small-dot"></span><span id="liveText">待機</span></div></div>
-     <div class="video-stage" id="videoStage">
+     <div class="video-stage" id="videoStage"><button type="button" id="stageFullscreenExit" class="stage-fullscreen-exit" aria-label="離開鏡頭全螢幕" title="離開全螢幕">✕　離開全螢幕</button>
        <video id="inputVideo" playsinline muted autoplay></video>
        <img id="inputImage" alt="網路攝影機影像" crossorigin="anonymous">
        <canvas id="overlay" aria-label="AI 物件偵測畫面"></canvas>
@@ -62,7 +73,7 @@
        <div class="stage-footer" id="stageFooter" hidden><span id="resolutionText">—</span><span id="detectorText">模型未啟動</span></div>
      </div>
      <div class="detected-wrap"><div class="detected-head"><strong>即時辨識結果</strong><span class="muted" id="detectedSummary">沒有目標</span></div><div class="detected-chips" id="detectedChips"><span class="empty-chip">啟動後將顯示辨識到的生物</span></div></div>
-     <div class="camera-actions"><button class="primary" id="startBtn">▶　開始偵測</button><button class="secondary" id="stopBtn" disabled>■　停止</button><button class="secondary" id="captureBtn" disabled>▧　畫面截圖</button></div>
+     <div class="camera-actions"><button class="primary" id="startBtn">▶　開始偵測</button><button class="secondary" id="stopBtn" disabled>■　停止</button><button class="secondary" id="captureBtn" disabled>▧　畫面截圖</button><button type="button" class="secondary" id="cameraFullscreenBtn" aria-pressed="false" title="將攝影畫面放大全螢幕">⛶ 鏡頭全螢幕</button></div>
     </section>
     <aside class="settings-col">
       <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">INPUT SOURCE</div><h3>影像來源</h3></div></div>
@@ -1052,6 +1063,60 @@ if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListe
 if(location.hostname==='localhost'||location.hostname==='127.0.0.1')$('networkUrl').placeholder=location.origin+'/stream';
 try{const savedMirror=localStorage.getItem('biowatch_mirror');if(savedMirror!==null)$('mirrorToggle').checked=savedMirror==='true';}catch(_){}
 restoreHistory();syncSourceFields();updateSliders();advancedScopeChanged();checkNotification();listDevices();
+
+
+/* Native Fullscreen API. Buttons keep the same source/canvas (and mirror setting) active. */
+(function initBioWatchFullscreen(){
+  const pageBtn=document.getElementById('pageFullscreenBtn');
+  const cameraBtn=document.getElementById('cameraFullscreenBtn');
+  const exitBtn=document.getElementById('stageFullscreenExit');
+  const stage=document.getElementById('videoStage');
+  const getActive=()=>document.fullscreenElement || document.webkitFullscreenElement || null;
+  async function requestFullscreen(element){
+    if(element.requestFullscreen) return element.requestFullscreen();
+    if(element.webkitRequestFullscreen) return element.webkitRequestFullscreen();
+    throw new Error('此瀏覽器不支援網頁元素全螢幕；電腦可使用 F11 切換瀏覽器全螢幕。');
+  }
+  async function exitFullscreen(){
+    if(document.exitFullscreen) return document.exitFullscreen();
+    if(document.webkitExitFullscreen) return document.webkitExitFullscreen();
+  }
+  function updateFullscreenButtons(){
+    const active=getActive();
+    const camera=active===stage;
+    const page=active===document.documentElement;
+    pageBtn.textContent=page?'↙ 結束網站全螢幕':'⛶ 網站全螢幕';
+    pageBtn.setAttribute('aria-pressed',String(page));
+    cameraBtn.textContent=camera?'↙ 結束鏡頭全螢幕':'⛶ 鏡頭全螢幕';
+    cameraBtn.setAttribute('aria-pressed',String(camera));
+  }
+  async function toggleFullscreen(target){
+    try{
+      const current=getActive();
+      if(current===target){await exitFullscreen();}
+      else if(current){await exitFullscreen();await requestFullscreen(target);}
+      else{await requestFullscreen(target);}
+    }catch(err){
+      const message=(err?.message||String(err));
+      if(typeof tell==='function')tell('無法切換全螢幕：'+message,true);
+      else alert('無法切換全螢幕：'+message);
+    }finally{updateFullscreenButtons();}
+  }
+  pageBtn.addEventListener('click',()=>toggleFullscreen(document.documentElement));
+  cameraBtn.addEventListener('click',()=>toggleFullscreen(stage));
+  exitBtn.addEventListener('click',()=>toggleFullscreen(stage));
+  document.addEventListener('fullscreenchange',updateFullscreenButtons);
+  document.addEventListener('webkitfullscreenchange',updateFullscreenButtons);
+  document.addEventListener('keydown',e=>{
+    if(e.key.toLowerCase()!=='f'||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+    const t=e.target;
+    if(t?.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t?.tagName))return;
+    if(e.target?.closest?.('[role="dialog"]'))return;
+    e.preventDefault();
+    toggleFullscreen(stage);
+  });
+  updateFullscreenButtons();
+})();
 
 </script>
 </body>
