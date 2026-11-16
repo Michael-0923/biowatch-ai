@@ -7,7 +7,7 @@
   <meta name="description" content="即時辨識鏡頭中的人、貓、狗、鳥及常見大型動物，提供聲音警示和事件紀錄。">
   <title>BioWatch｜AI 生物偵測警報系統</title>
   <style>
-:root{color-scheme:dark;--bg:#0b111b;--panel:#141d2a;--panel2:#111925;--line:#293547;--text:#eaf2fd;--sub:#93a5ba;--muted:#6f839d;--accent:#35dfbc;--yellow:#edcc81;--red:#ff756e;--radius:17px}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 72% 20% at 60% 0%,#162b38 0%,transparent 80%),var(--bg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:var(--text);font-size:14px;line-height:1.5}.app-shell{max-width:1340px;margin:auto;padding:0 28px}button,input,select{font:inherit}button{cursor:pointer;transition:background .2s,transform .1s,border-color .2s}button:active:not(:disabled){transform:scale(.98)}button:disabled{opacity:.42;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}header.topbar{display:flex;align-items:center;justify-content:space-between;min-height:95px;border-bottom:1px solid #243246;gap:15px}.brand{display:flex;align-items:center;gap:14px}.brand-icon{width:44px;height:44px;border:1px solid #367e7b;background:#163c3d;display:grid;place-items:center;border-radius:13px;color:var(--accent);font-size:32px}.brand-kicker,.panel-kicker,.eyebrow{font-size:10px;font-weight:750;letter-spacing:2.5px;color:var(--accent)}h1{font-size:21px;letter-spacing:.5px;margin:1px 0 0}h2{font-size:31px;letter-spacing:-.65px;margin:5px 0 7px}h3{font-size:17px;margin:2px 0 0}.top-status{display:flex;gap:10px;align-items:center;color:var(--sub);font-size:12px}.status-dot,.small-dot{height:8px;width:8px;display:inline-block;border-radius:99px;background:#7a879b}.status-dot.running,.live-pill.running .small-dot{background:var(--accent);box-shadow:0 0 15px #35dfbc99}.status-dot.busy{background:var(--yellow)}.status-dot.error{background:var(--red)}.status-divider{height:17px;width:1px;background:var(--line);margin:0 3px}.local-badge{border:1px solid #386259;background:#18372f;color:#9ce7d6;border-radius:25px;padding:5px 10px}.intro{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:31px 0 27px}.intro p:not(.eyebrow){color:var(--sub);margin:0}.eyebrow{margin:0}.supported-label{white-space:nowrap;color:#a4f4df;border:1px solid #356053;background:#17362f;padding:12px 16px;border-radius:9px;font-size:12px}.supported-label span{font-size:15px;margin-left:9px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}.stat,.panel{background:linear-gradient(150deg,#172130,#131c28);border:1px solid var(--line);border-radius:var(--radius)}.stat{padding:18px 22px;min-height:99px}.stat-label{color:var(--sub);font-size:12px}.stat-value{font-weight:760;font-size:31px;letter-spacing:.3px;margin-top:2px}.stat-value span{color:var(--muted);font-size:12px;font-weight:400}.main-layout{display:grid;grid-template-columns:minmax(0,1.77fr) minmax(320px,1fr);gap:18px;align-items:start}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;gap:10px}.video-panel{overflow:hidden}.live-pill{display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:30px;color:#a7b5c7;font-size:12px}.live-pill.running{color:#8bf9db;border-color:#2f7868;background:#15362e}.video-stage{margin:0 16px;background:#090e17;aspect-ratio:16/9;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:10px;border:1px solid #304152}.video-stage video,.video-stage img{display:none}.video-stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;z-index:1}.scan-lines{position:absolute;pointer-events:none;inset:0;background:repeating-linear-gradient(0deg,transparent 0 19px,#2533451b 20px 21px);opacity:.28;z-index:2}.viewfinder{pointer-events:none;position:absolute;inset:17px;z-index:3;opacity:.55}.corner{position:absolute;width:21px;height:21px;border-color:#61d9c0;border-style:solid}.tl{top:0;left:0;border-width:2px 0 0 2px}.tr{top:0;right:0;border-width:2px 2px 0 0}.bl{bottom:0;left:0;border-width:0 0 2px 2px}.br{bottom:0;right:0;border-width:0 2px 2px 0}.stage-empty{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.stage-empty strong{margin-top:16px;font-size:18px}.stage-empty p{margin:5px 0;color:var(--sub);font-size:12px}.radar{width:83px;height:83px;display:grid;place-items:center;border:1px solid #28534e;border-radius:50%;color:var(--accent);font-size:38px;position:relative;background:radial-gradient(#153b36,#0e2024 70%)}.radar-ring{position:absolute;inset:11px;border:1px solid #2b514f;border-radius:50%}.radar-ring.r2{inset:23px}.radar span{z-index:1}.stage-footer{position:absolute;z-index:4;bottom:0;left:0;right:0;padding:11px 13px;font-size:10px;display:flex;justify-content:space-between;background:linear-gradient(transparent,#071018bf);text-shadow:0 1px 3px #000}.stage-footer[hidden]{display:none}.detected-wrap{padding:18px 21px 15px}.detected-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}.muted{color:var(--sub)}.detected-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;min-height:33px}.detect-chip{background:#184339;color:#9ffbe2;border:1px solid #358774;border-radius:7px;padding:6px 11px;font-size:12px}.detect-chip span{opacity:.75;margin-left:7px}.empty-chip{border:1px dashed #334458;padding:6px 10px;border-radius:7px;color:#8292a8;font-size:12px}.camera-actions{border-top:1px solid var(--line);padding:17px 21px;display:flex;gap:10px;flex-wrap:wrap}.primary{background:var(--accent);color:#08201c;border:1px solid var(--accent);font-weight:750}.primary:hover{background:#6de9d0}.primary,.secondary,.outline-full{padding:11px 17px;border-radius:9px;font-size:13px}.secondary{background:#1b2839;color:#c4d1e2;border:1px solid #37465b}.secondary:hover:not(:disabled){background:#26394c}.settings-col{display:grid;gap:17px}.settings-panel{padding-bottom:20px}.settings-panel .panel-head{padding-bottom:14px}.settings-panel>:not(.panel-head){margin-left:20px;margin-right:20px}.field-label{color:#b6c6d8;font-weight:600;font-size:12px;display:block;margin-bottom:8px}select,input[type=url],input[type=file]{width:calc(100% - 40px);border:1px solid #37465a;background:#101926;border-radius:9px;color:#d9e3f0;padding:11px 10px;min-height:43px}select{appearance:auto}input[type=file]{font-size:11px}.field-row{display:flex;justify-content:space-between;align-items:center;margin-top:20px}.field-row .field-label{margin-bottom:9px}.link-button{background:none;border:none;color:var(--accent);font-size:11px;padding:3px;margin-bottom:8px}.hint{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}.settings-panel>div[hidden]{display:none}#fileFields,#networkFields{margin-top:20px}.range-heading{display:flex;justify-content:space-between;align-items:center;margin-top:4px}.range-heading strong{font-size:12px;color:var(--accent)}.cooldown-heading{margin-top:22px}.range-heading .field-label{margin:0}input[type=range]{width:calc(100% - 40px);accent-color:var(--accent);margin-top:12px;cursor:pointer}.range-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:0}.subheading{margin-top:23px;margin-bottom:10px;color:#b6c6d8;font-size:12px;font-weight:600}.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.check{display:flex;align-items:center;gap:9px;border:1px solid #344456;background:#182535;border-radius:9px;padding:10px 9px;cursor:pointer;font-size:12px}.check input{accent-color:var(--accent);height:16px;width:16px}.divider{height:1px;background:var(--line);margin-top:19px;margin-bottom:15px}.toggle-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.toggle-line strong{font-size:12px;font-weight:600}.toggle-line small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.toggle-line input{appearance:none;width:39px;height:22px;background:#38485b;border-radius:99px;position:relative;flex-shrink:0;cursor:pointer;transition:background .2s}.toggle-line input:before{content:"";width:16px;height:16px;position:absolute;left:3px;top:3px;border-radius:50%;background:white;transition:transform .2s}.toggle-line input:checked{background:#238d7a}.toggle-line input:checked:before{transform:translateX(17px)}.outline-full{display:block;background:transparent;border:1px solid #41695e;color:#87ebd5;width:calc(100% - 40px);margin-top:18px}.outline-full:hover{background:#19352f}.history-panel{margin-top:19px}.history-head{border-bottom:1px solid var(--line)}.history-head h3{display:flex;align-items:center;gap:9px}.history-count{background:#253648;border-radius:20px;padding:1px 9px;color:#a5b9c8;font-size:11px}.history-actions{display:flex;gap:8px}.small{font-size:11px;padding:8px 12px}.log-list{max-height:330px;overflow:auto}.log-empty{padding:35px 20px;text-align:center;color:var(--muted);font-size:12px}.log-item{padding:15px 22px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #273545}.log-item:last-child{border-bottom:0}.log-icon{width:34px;height:34px;display:grid;place-items:center;background:#243d38;border-radius:9px;font-size:18px}.log-description{flex:1;min-width:0}.log-title{font-size:13px;font-weight:650}.log-meta{color:var(--sub);font-size:11px;margin-top:3px}.score-tag{color:#96e8d1;font-size:11px;white-space:nowrap}.notice{background:#121c27;border:1px solid #2b3c4d;border-left:3px solid #68a8aa;border-radius:10px;margin-top:21px;padding:18px 21px;color:#9cacc0;font-size:12px;line-height:1.8}.notice>strong{font-size:13px;color:#d6e2ee}.notice p{margin:8px 0 0}.notice p strong{color:#d2dedf;font-weight:600}footer{text-align:center;color:#5f7288;font-size:11px;padding:27px 0 38px}.toast{position:fixed;bottom:25px;right:25px;background:#1b4d41;color:#e1fff5;z-index:99;max-width:min(430px,calc(100vw - 34px));padding:13px 16px;border:1px solid #319881;border-radius:10px;box-shadow:0 12px 35px #0008;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;font-size:13px}.toast.visible{opacity:1;transform:translateY(0)}.toast.warn{background:#4b2c27;border-color:#a15a4f;color:#fff2df}@media(max-width:960px){.main-layout{grid-template-columns:1fr}.settings-col{grid-template-columns:repeat(2,minmax(0,1fr))}.intro{align-items:flex-start}.supported-label{white-space:normal}}@media(max-width:680px){.app-shell{padding:0 13px}header.topbar{min-height:75px}.brand-icon{width:37px;height:37px;font-size:26px}.brand-kicker{font-size:9px}h1{font-size:16px}.local-badge,.status-divider{display:none}.top-status{font-size:11px}.intro{display:block;padding:23px 0 18px}h2{font-size:24px}.supported-label{display:inline-block;margin-top:15px;padding:8px 10px}.stats{gap:8px}.stat{padding:13px 10px;min-height:77px}.stat-label{font-size:10px}.stat-value{font-size:25px}.stat-value span{font-size:10px}.settings-col{grid-template-columns:1fr}.main-layout{gap:14px}.panel-head{padding:16px}.video-stage{margin:0 9px}.stage-empty strong{font-size:15px}.radar{width:61px;height:61px}.camera-actions{padding:14px 12px;gap:8px}.primary,.secondary{padding:10px 12px}.history-head{display:block}.history-actions{margin-top:13px}.log-item{padding:12px 15px}.notice{padding:14px}}
+:root{color-scheme:dark;--bg:#0b111b;--panel:#141d2a;--panel2:#111925;--line:#293547;--text:#eaf2fd;--sub:#93a5ba;--muted:#6f839d;--accent:#35dfbc;--yellow:#edcc81;--red:#ff756e;--radius:17px}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 72% 20% at 60% 0%,#162b38 0%,transparent 80%),var(--bg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color:var(--text);font-size:14px;line-height:1.5}.app-shell{max-width:1340px;margin:auto;padding:0 28px}button,input,select{font:inherit}button{cursor:pointer;transition:background .2s,transform .1s,border-color .2s}button:active:not(:disabled){transform:scale(.98)}button:disabled{opacity:.42;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}header.topbar{display:flex;align-items:center;justify-content:space-between;min-height:95px;border-bottom:1px solid #243246;gap:15px}.brand{display:flex;align-items:center;gap:14px}.brand-icon{width:44px;height:44px;border:1px solid #367e7b;background:#163c3d;display:grid;place-items:center;border-radius:13px;color:var(--accent);font-size:32px}.brand-kicker,.panel-kicker,.eyebrow{font-size:10px;font-weight:750;letter-spacing:2.5px;color:var(--accent)}h1{font-size:21px;letter-spacing:.5px;margin:1px 0 0}h2{font-size:31px;letter-spacing:-.65px;margin:5px 0 7px}h3{font-size:17px;margin:2px 0 0}.top-status{display:flex;gap:10px;align-items:center;color:var(--sub);font-size:12px}.status-dot,.small-dot{height:8px;width:8px;display:inline-block;border-radius:99px;background:#7a879b}.status-dot.running,.live-pill.running .small-dot{background:var(--accent);box-shadow:0 0 15px #35dfbc99}.status-dot.busy{background:var(--yellow)}.status-dot.error{background:var(--red)}.status-divider{height:17px;width:1px;background:var(--line);margin:0 3px}.local-badge{border:1px solid #386259;background:#18372f;color:#9ce7d6;border-radius:25px;padding:5px 10px}.intro{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:31px 0 27px}.intro p:not(.eyebrow){color:var(--sub);margin:0}.eyebrow{margin:0}.supported-label{white-space:nowrap;color:#a4f4df;border:1px solid #356053;background:#17362f;padding:12px 16px;border-radius:9px;font-size:12px}.supported-label span{font-size:15px;margin-left:9px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}.stat,.panel{background:linear-gradient(150deg,#172130,#131c28);border:1px solid var(--line);border-radius:var(--radius)}.stat{padding:18px 22px;min-height:99px}.stat-label{color:var(--sub);font-size:12px}.stat-value{font-weight:760;font-size:31px;letter-spacing:.3px;margin-top:2px}.stat-value span{color:var(--muted);font-size:12px;font-weight:400}.main-layout{display:grid;grid-template-columns:minmax(0,1.77fr) minmax(320px,1fr);gap:18px;align-items:start}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;gap:10px}.video-panel{overflow:hidden}.live-pill{display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:30px;color:#a7b5c7;font-size:12px}.live-pill.running{color:#8bf9db;border-color:#2f7868;background:#15362e}.video-stage{margin:0 16px;background:#090e17;aspect-ratio:16/9;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:10px;border:1px solid #304152}.video-stage video,.video-stage img{display:none}.video-stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;z-index:1}.scan-lines{position:absolute;pointer-events:none;inset:0;background:repeating-linear-gradient(0deg,transparent 0 19px,#2533451b 20px 21px);opacity:.28;z-index:2}.viewfinder{pointer-events:none;position:absolute;inset:17px;z-index:3;opacity:.55}.corner{position:absolute;width:21px;height:21px;border-color:#61d9c0;border-style:solid}.tl{top:0;left:0;border-width:2px 0 0 2px}.tr{top:0;right:0;border-width:2px 2px 0 0}.bl{bottom:0;left:0;border-width:0 0 2px 2px}.br{bottom:0;right:0;border-width:0 2px 2px 0}.stage-empty{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.stage-empty strong{margin-top:16px;font-size:18px}.stage-empty p{margin:5px 0;color:var(--sub);font-size:12px}.radar{width:83px;height:83px;display:grid;place-items:center;border:1px solid #28534e;border-radius:50%;color:var(--accent);font-size:38px;position:relative;background:radial-gradient(#153b36,#0e2024 70%)}.radar-ring{position:absolute;inset:11px;border:1px solid #2b514f;border-radius:50%}.radar-ring.r2{inset:23px}.radar span{z-index:1}.stage-footer{position:absolute;z-index:4;bottom:0;left:0;right:0;padding:11px 13px;font-size:10px;display:flex;justify-content:space-between;background:linear-gradient(transparent,#071018bf);text-shadow:0 1px 3px #000}.stage-footer[hidden]{display:none}.detected-wrap{padding:18px 21px 15px}.detected-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}.muted{color:var(--sub)}.detected-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;min-height:33px}.detect-chip{background:#184339;color:#9ffbe2;border:1px solid #358774;border-radius:7px;padding:6px 11px;font-size:12px}.detect-chip span{opacity:.75;margin-left:7px}.detect-chip.provisional{background:#363222;color:#e1c58d;border-color:#5d5132}.detect-chip.protected{background:#47352a;border-color:#aa815a;color:#ffdaa1}.detect-chip.protected strong{font-size:11px;margin-right:4px}.empty-chip{border:1px dashed #334458;padding:6px 10px;border-radius:7px;color:#8292a8;font-size:12px}.camera-actions{border-top:1px solid var(--line);padding:17px 21px;display:flex;gap:10px;flex-wrap:wrap}.primary{background:var(--accent);color:#08201c;border:1px solid var(--accent);font-weight:750}.primary:hover{background:#6de9d0}.primary,.secondary,.outline-full{padding:11px 17px;border-radius:9px;font-size:13px}.secondary{background:#1b2839;color:#c4d1e2;border:1px solid #37465b}.secondary:hover:not(:disabled){background:#26394c}.settings-col{display:grid;gap:17px}.settings-panel{padding-bottom:20px}.settings-panel .panel-head{padding-bottom:14px}.settings-panel>:not(.panel-head){margin-left:20px;margin-right:20px}.field-label{color:#b6c6d8;font-weight:600;font-size:12px;display:block;margin-bottom:8px}select,input[type=url],input[type=file]{width:calc(100% - 40px);border:1px solid #37465a;background:#101926;border-radius:9px;color:#d9e3f0;padding:11px 10px;min-height:43px}select{appearance:auto}input[type=file]{font-size:11px}.field-row{display:flex;justify-content:space-between;align-items:center;margin-top:20px}.field-row .field-label{margin-bottom:9px}.link-button{background:none;border:none;color:var(--accent);font-size:11px;padding:3px;margin-bottom:8px}.hint{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}.settings-panel>div[hidden]{display:none}#fileFields,#networkFields{margin-top:20px}.range-heading{display:flex;justify-content:space-between;align-items:center;margin-top:4px}.range-heading strong{font-size:12px;color:var(--accent)}.cooldown-heading{margin-top:22px}.range-heading .field-label{margin:0}input[type=range]{width:calc(100% - 40px);accent-color:var(--accent);margin-top:12px;cursor:pointer}.range-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:0}.subheading{margin-top:23px;margin-bottom:10px;color:#b6c6d8;font-size:12px;font-weight:600}.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.check{display:flex;align-items:center;gap:9px;border:1px solid #344456;background:#182535;border-radius:9px;padding:10px 9px;cursor:pointer;font-size:12px}.check input{accent-color:var(--accent);height:16px;width:16px}.divider{height:1px;background:var(--line);margin-top:19px;margin-bottom:15px}.toggle-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.toggle-line strong{font-size:12px;font-weight:600}.toggle-line small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.toggle-line input{appearance:none;width:39px;height:22px;background:#38485b;border-radius:99px;position:relative;flex-shrink:0;cursor:pointer;transition:background .2s}.toggle-line input:before{content:"";width:16px;height:16px;position:absolute;left:3px;top:3px;border-radius:50%;background:white;transition:transform .2s}.toggle-line input:checked{background:#238d7a}.toggle-line input:checked:before{transform:translateX(17px)}.outline-full{display:block;background:transparent;border:1px solid #41695e;color:#87ebd5;width:calc(100% - 40px);margin-top:18px}.outline-full:hover{background:#19352f}.history-panel{margin-top:19px}.history-head{border-bottom:1px solid var(--line)}.history-head h3{display:flex;align-items:center;gap:9px}.history-count{background:#253648;border-radius:20px;padding:1px 9px;color:#a5b9c8;font-size:11px}.history-actions{display:flex;gap:8px}.small{font-size:11px;padding:8px 12px}.log-list{max-height:330px;overflow:auto}.log-empty{padding:35px 20px;text-align:center;color:var(--muted);font-size:12px}.log-item{padding:15px 22px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #273545}.log-item:last-child{border-bottom:0}.log-icon{width:34px;height:34px;display:grid;place-items:center;background:#243d38;border-radius:9px;font-size:18px}.log-description{flex:1;min-width:0}.log-title{font-size:13px;font-weight:650}.log-meta{color:var(--sub);font-size:11px;margin-top:3px}.score-tag{color:#96e8d1;font-size:11px;white-space:nowrap}.notice{background:#121c27;border:1px solid #2b3c4d;border-left:3px solid #68a8aa;border-radius:10px;margin-top:21px;padding:18px 21px;color:#9cacc0;font-size:12px;line-height:1.8}.notice>strong{font-size:13px;color:#d6e2ee}.notice p{margin:8px 0 0}.notice p strong{color:#d2dedf;font-weight:600}footer{text-align:center;color:#5f7288;font-size:11px;padding:27px 0 38px}.toast{position:fixed;bottom:25px;right:25px;background:#1b4d41;color:#e1fff5;z-index:99;max-width:min(430px,calc(100vw - 34px));padding:13px 16px;border:1px solid #319881;border-radius:10px;box-shadow:0 12px 35px #0008;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;font-size:13px}.toast.visible{opacity:1;transform:translateY(0)}.toast.warn{background:#4b2c27;border-color:#a15a4f;color:#fff2df}@media(max-width:960px){.main-layout{grid-template-columns:1fr}.settings-col{grid-template-columns:repeat(2,minmax(0,1fr))}.intro{align-items:flex-start}.supported-label{white-space:normal}}@media(max-width:680px){.app-shell{padding:0 13px}header.topbar{min-height:75px}.brand-icon{width:37px;height:37px;font-size:26px}.brand-kicker{font-size:9px}h1{font-size:16px}.local-badge,.status-divider{display:none}.top-status{font-size:11px}.intro{display:block;padding:23px 0 18px}h2{font-size:24px}.supported-label{display:inline-block;margin-top:15px;padding:8px 10px}.stats{gap:8px}.stat{padding:13px 10px;min-height:77px}.stat-label{font-size:10px}.stat-value{font-size:25px}.stat-value span{font-size:10px}.settings-col{grid-template-columns:1fr}.main-layout{gap:14px}.panel-head{padding:16px}.video-stage{margin:0 9px}.stage-empty strong{font-size:15px}.radar{width:61px;height:61px}.camera-actions{padding:14px 12px;gap:8px}.primary,.secondary{padding:10px 12px}.history-head{display:block}.history-actions{margin-top:13px}.log-item{padding:12px 15px}.notice{padding:14px}}
 
 #deviceSelect,#fileInput,#networkUrl{width:100%}
 
@@ -16,11 +16,11 @@
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V1.0</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V2.0 · WILDLIFE</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span></div>
   </header>
   <main>
-   <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">可辨識人 + 10 種常見動物 <span>↗</span></div></section>
+   <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">雙模型辨識 · 保育類候選識別 <span>↗</span></div></section>
    <div class="stats">
       <div class="stat"><div class="stat-label">目前偵測目標</div><div class="stat-value" id="currentCount">0 <span>個</span></div></div>
       <div class="stat"><div class="stat-label">本次警報次數</div><div class="stat-value" id="alertCount">0 <span>次</span></div></div>
@@ -49,10 +49,15 @@
        <div id="networkFields" hidden><label for="networkUrl" class="field-label">MJPEG / 影像網址</label><input id="networkUrl" type="url" placeholder="例如 http://127.0.0.1:8765/stream"><p class="hint">RTSP 鏡頭請使用附贈的 camera_bridge.py 轉接。跨來源網址必須允許 CORS，且不得被瀏覽器安全政策阻擋。</p></div>
       </section>
       <section class="panel settings-panel"><div class="panel-head"><div><div class="panel-kicker">DETECTION RULES</div><h3>辨識與警報設定</h3></div></div>
-       <div class="range-heading"><label for="confidence" class="field-label">辨識可信度門檻</label><strong id="confidenceValue">55%</strong></div><input id="confidence" type="range" min="30" max="90" step="5" value="55"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
+       <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">65%</strong></div><input id="confidence" type="range" min="40" max="90" step="5" value="65"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
+       <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">3 次</strong></div><input id="confirmFrames" type="range" min="2" max="5" step="1" value="3"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
        <div class="range-heading cooldown-heading"><label for="cooldown" class="field-label">同類警報冷卻時間</label><strong id="cooldownValue">15 秒</strong></div><input id="cooldown" type="range" min="5" max="120" step="5" value="15"><div class="range-ends"><span>5 秒</span><span>120 秒</span></div>
        <div class="subheading">想要警示的生物類別</div>
-       <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label></div>
+       <div class="check-grid"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
+       <div class="divider"></div>
+       <label class="toggle-line"><span><strong>進階野生動物辨識（實驗）</strong><small>比對石虎、穿山甲、臺灣黑熊、草鴞等候選物種；初次需下載約 150 MB AI 模型。</small></span><input type="checkbox" id="advancedToggle" role="switch"></label>
+       <p class="hint" id="advancedStatus" aria-live="polite">未啟用。可先使用一般辨識；啟用後會另外下載 CLIP 模型。</p>
+       <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">25%</strong></div><input id="speciesThreshold" type="range" min="15" max="65" step="5" value="25"><p class="hint">此為候選標籤間的相對分數，不是物種真實機率。需有明顯領先差距、連續比對，才可能提示。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
        <button id="notifyBtn" class="outline-full">啟用桌面通知</button><p class="hint" id="notifyStatus">桌面通知依瀏覽器與作業系統支援情況而定。</p>
@@ -60,7 +65,7 @@
     </aside>
    </div>
    <section class="panel history-panel"><div class="panel-head history-head"><div><div class="panel-kicker">ACTIVITY LOG</div><h3>警報事件紀錄 <span id="historyCount" class="history-count">0</span></h3></div><div class="history-actions"><button class="secondary small" id="exportBtn">匯出 CSV</button><button class="secondary small" id="clearBtn">清除紀錄</button></div></div><div class="log-list" id="logList"><div class="log-empty">目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。</div></div></section>
-   <section class="notice"><strong>辨識範圍說明</strong><p>這是可實際運作的第一版，使用 COCO-SSD 模型，可分辨<strong>人、鳥、貓、狗、馬、羊、牛、大象、熊、斑馬、長頸鹿</strong>。目前<strong>無法可靠辨識所有生物</strong>，例如蛇、蜥蜴、昆蟲、老鼠、植物或細部品種；也無法保證完全沒有漏報、誤報。持續監控時請保持網頁開啟與裝置運作。</p><p>模型首次使用需要網路下載；辨識在裝置本機進行，畫面不會由本程式主動上傳。警報歷史的文字紀錄保存在目前瀏覽器。</p></section>
+   <section class="notice"><strong>辨識範圍說明</strong><p>一般辨識採用 COCO-SSD，可偵測<strong>人、鳥、貓、狗、馬、羊、牛、大象、熊、斑馬、長頸鹿</strong>，較嚴格門檻與連續影格確認可降低部分誤報。進階功能另以 CLIP 比對<strong>石虎、臺灣黑熊、穿山甲、歐亞水獺、黑面琵鷺、草鴞、熊鷹、臺灣藍鵲、藍腹鷴、臺灣野山羊、黃喉貂</strong>及其他常見野生動物。<strong>進階結果只代表視覺相似的「疑似物種」，不是已確認保育類，也不是法定鑑定或真實機率</strong>；外觀相近、夜間、模糊畫面很容易誤判，請保存原始畫面並由專家複核。</p><p>模型首次使用需要網路下載，進階模型可能耗用較多記憶體、流量與時間。推論在裝置端進行，圖片不會由本程式主動傳給雲端辨識；模型本身從第三方 CDN／Hugging Face 下載。保育類偵測為輔助線索，可能漏報；監控需保持網頁及鏡頭持續運作，警報歷史只保存在目前瀏覽器。</p></section>
   </main>
   <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。</footer>
  </div>
@@ -77,7 +82,41 @@ const LABELS = {
   cow: ['牛', 'wild', '🐮'], elephant: ['大象', 'wild', '🐘'], bear: ['熊', 'wild', '🐻'],
   zebra: ['斑馬', 'wild', '🦓'], giraffe: ['長頸鹿', 'wild', '🦒']
 };
-const FILTER_IDS = {person: 'filterPerson', pets: 'filterPets', bird: 'filterBird', wild: 'filterWild'};
+const SPECIES = [
+  // Potential lookalikes are deliberate negative controls. Scores are NOT calibrated probabilities.
+  ['leopard_cat','石虎','protected','🐆','a photograph of a leopard cat, Prionailurus bengalensis'],
+  ['formosan_bear','臺灣黑熊','protected','🐻','a photograph of a Formosan Asiatic black bear'],
+  ['pangolin','穿山甲','protected','🦔','a photograph of a Chinese pangolin'],
+  ['otter','歐亞水獺','protected','🦦','a photograph of a Eurasian otter'],
+  ['spoonbill','黑面琵鷺','protected','🦩','a photograph of a black-faced spoonbill'],
+  ['grass_owl','草鴞','protected','🦉','a photograph of an eastern grass owl'],
+  ['hawk_eagle','熊鷹','protected','🦅','a photograph of a mountain hawk eagle'],
+  ['blue_magpie','臺灣藍鵲','protected','🐦','a photograph of a Taiwan blue magpie'],
+  ['swinhoes_pheasant','藍腹鷴','protected','🐦','a photograph of a Swinhoe pheasant'],
+  ['serow','臺灣野山羊','protected','🐐','a photograph of a Formosan serow'],
+  ['yellow_marten','黃喉貂','protected','🦝','a photograph of a yellow-throated marten'],
+  ['macaque','猴子','other','🐒','a photograph of a macaque monkey'],
+  ['wild_boar','野豬','other','🐗','a photograph of a wild boar'],
+  ['deer','鹿／山羌','other','🦌','a photograph of a muntjac deer'],
+  ['squirrel','松鼠','other','🐿️','a photograph of a squirrel'],
+  ['rabbit','兔子','other','🐇','a photograph of a wild rabbit'],
+  ['raccoon','浣熊','other','🦝','a photograph of a raccoon'],
+  ['fox','狐狸','other','🦊','a photograph of a red fox'],
+  ['snake','蛇','other','🐍','a photograph of a snake'],
+  ['lizard','蜥蜴','other','🦎','a photograph of a lizard'],
+  ['turtle','龜','other','🐢','a photograph of a turtle'],
+  ['frog','蛙','other','🐸','a photograph of a frog'],
+  ['butterfly','蝴蝶','other','🦋','a photograph of a butterfly'],
+  ['mouse','鼠','other','🐭','a photograph of a mouse'],
+];
+const NEGATIVES = [
+  'a photograph of a person', 'a photograph of a pet dog',
+  'a photograph of a domestic cat', 'a photograph of a common pigeon',
+  'an empty forest trail with no animal', 'a photo of grass and trees',
+  'a photograph of a vehicle', 'a photograph of an animal statue or toy'
+];
+for(const [key,zh,group,emoji] of SPECIES)LABELS[key]=[zh,group,emoji];
+const FILTER_IDS = {person: 'filterPerson', pets: 'filterPets', bird: 'filterBird', wild: 'filterWild', protected:'filterProtected', other:'filterOther'};
 const STORAGE_KEY = 'biowatch_history_v1';
 const els = {
   canvas: $('overlay'), ctx: $('overlay').getContext('2d', {alpha:false}),
@@ -87,7 +126,10 @@ const state = {
   running:false, session:0, model:null, modelLoading:null, stream:null,
   source:null, localUrl:null, predictions:[], lastSeen:new Map(), lastAlert:new Map(),
   alertCount:0, detectionHz:0, lastDetectAt:0, raf:0, timer:0, lastDrawAt:0, audio:null,
-  history:[], notificationReady:false
+  history:[], notificationReady:false,
+  tracks:new Map(), advancedModel:null, advancedLoading:null, advancedError:false,
+  advancedCandidate:null, advancedEvidence:null, advancedBusy:false,
+  advancedTimer:0, advancedFrame:null, lastMotion:0
 };
 let toastTimer;
 
@@ -113,8 +155,10 @@ function updateControls(){
 function updateSliders(){
   $('confidenceValue').textContent=$('confidence').value+'%';
   $('cooldownValue').textContent=$('cooldown').value+' 秒';
+  $('confirmFramesValue').textContent=$('confirmFrames').value+' 次';
+  $('speciesThresholdValue').textContent=$('speciesThreshold').value+'%';
 }
-function wanted(p){return Boolean(LABELS[p.class] && $(FILTER_IDS[LABELS[p.class][1]]).checked);}
+function wanted(p){const meta=LABELS[p.class];return Boolean(meta&&$(FILTER_IDS[meta[1]])?.checked);}
 function getDims(){
   if(!state.source) return null;
   const el=state.source;
@@ -205,11 +249,125 @@ async function loadModel(){
       // Prioritize predictable performance on mobile devices.
       try { await tf.setBackend('webgl'); } catch(_) { await tf.setBackend('cpu'); }
       await tf.ready();
-      return cocoSsd.load({base:'lite_mobilenet_v2'});
+      return cocoSsd.load({base:'mobilenet_v2'});
     })().then(model=>{state.model=model;return model;}).catch(err=>{state.modelLoading=null;throw err;});
   }
   return state.modelLoading;
 }
+
+const ADVANCED_PROMPTS = SPECIES.map(s=>s[4]).concat(NEGATIVES);
+const PROMPT_TO_SPECIES = new Map(SPECIES.map(s=>[s[4],s]));
+function advancedNote(txt,warning=false){
+  const el=$('advancedStatus');el.textContent=txt;el.style.color=warning?'#ffb5ab':'';
+}
+async function loadAdvancedModel(){
+  if(state.advancedModel)return state.advancedModel;
+  if(!state.advancedLoading){
+    state.advancedLoading=(async()=>{
+      advancedNote('正在載入進階模型（初次約 150 MB），可能耗費流量與較長時間…');
+      const {pipeline}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm');
+      return pipeline('zero-shot-image-classification','Xenova/clip-vit-base-patch32',{
+        dtype:'q8',device:'wasm',
+        progress_callback:(p)=>{
+          if(!p||p.status!=='progress'||!Number.isFinite(p.progress))return;
+          if(p.file&& !String(p.file).includes('.onnx'))return;
+          advancedNote(`進階 AI 模型下載中 ${Math.round(p.progress)}% · 僅供輔助辨識`);
+        }
+      });
+    })().then(model=>{state.advancedModel=model;advancedNote('進階模型已就緒 · 定期比對疑似野生物種');return model;}).catch(err=>{state.advancedLoading=null;throw err;});
+  }
+  return state.advancedLoading;
+}
+function sceneChange(){
+  const dims=getDims();if(!dims)return false;
+  const c=document.createElement('canvas');c.width=80;c.height=48;
+  const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(state.source,0,0,80,48);
+  const pixels=g.getImageData(0,0,80,48).data,prev=state.advancedFrame;
+  state.advancedFrame=new Uint8ClampedArray(pixels);
+  if(!prev)return false;
+  let changed=0,total=0;
+  for(let i=0;i<pixels.length;i+=16){
+    total++;
+    const r=Math.abs(pixels[i]-prev[i]),b=Math.abs(pixels[i+1]-prev[i+1]),g=Math.abs(pixels[i+2]-prev[i+2]);
+    if((r+b+g)/3>20)changed++;
+  }
+  return changed/Math.max(1,total)>.035;
+}
+function snapshotForAdvanced(){
+  const dims=getDims();if(!dims)return null;
+  const animals=state.predictions.filter(p=>p.class!=='person').sort((a,b)=>b.score-a.score);
+  const animal=animals[0];
+  const [width,height]=dims;
+  let sx=0,sy=0,sw=width,sh=height;
+  if(animal){
+    const [x,y,w,h]=animal.bbox,margin=Math.max(w,h)*.16;
+    sx=Math.max(0,x-margin);sy=Math.max(0,y-margin);
+    sw=Math.min(width-sx,w+margin*2);sh=Math.min(height-sy,h+margin*2);
+    if(sw<15||sh<15){sx=0;sy=0;sw=width;sh=height;}
+  }
+  const c=document.createElement('canvas');c.width=224;c.height=224;
+  const g=c.getContext('2d');g.fillStyle='#333';g.fillRect(0,0,c.width,c.height);
+  const scale=Math.min(224/sw,224/sh),dw=sw*scale,dh=sh*scale;
+  g.drawImage(state.source,sx,sy,sw,sh,(224-dw)/2,(224-dh)/2,dw,dh);
+  return c.toDataURL('image/jpeg',.88);
+}
+async function startAdvanced(runId){
+  if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
+  if(state.advancedBusy||state.advancedError)return;
+  clearTimeout(state.advancedTimer);
+  state.advancedBusy=true;
+  try{
+    const model=await loadAdvancedModel();
+    if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
+    advancedNote('進階模型運作中 · 約每 5 秒比對一次；僅顯示疑似候選');
+    const moving=sceneChange();
+    const staticFile=$('sourceType').value==='file'&&state.source?.tagName==='IMG';
+    const hasAnimal=state.predictions.some(p=>p.class!=='person');
+    // The full-scene classifier must not continuously turn an empty static landscape into a "rare animal".
+    if(moving)state.lastMotion=performance.now();
+    if(!staticFile&&!hasAnimal&&performance.now()-state.lastMotion>7000){
+      state.advancedCandidate=null;state.advancedEvidence=null;reflectDetections();return;
+    }
+    const data=snapshotForAdvanced();if(!data)return;
+    const predictions=await model(data,ADVANCED_PROMPTS);
+    if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
+    const sorted=[...predictions].sort((a,b)=>b.score-a.score),best=sorted[0],runner=sorted[1];
+    const candidate=best&&PROMPT_TO_SPECIES.get(best.label);
+    const minScore=Number($('speciesThreshold').value)/100;
+    const gap=best.score-(runner?.score||0);
+    if(!candidate||best.score<minScore||gap<.07||!wanted({class:candidate[0]})){
+      state.advancedCandidate=null;state.advancedEvidence=null;
+      advancedNote('進階比對中 · 目前沒有足夠明確的野生動物候選（不代表環境一定安全）');
+    }else{
+      const prev=state.advancedEvidence;
+      const count=prev?.kind===candidate[0]?Math.min(prev.count+1,8):1;
+      const wasAlerted=prev?.kind===candidate[0]&&prev.alerted;
+      const item={kind:candidate[0],score:best.score,count,protected:candidate[2]==='protected',alerted:wasAlerted};
+      state.advancedEvidence=item;state.advancedCandidate=item;
+      if(count>=2&&!wasAlerted){
+        const now=performance.now(),last=state.lastAlert.get(candidate[0])||-Infinity;
+        if(now-last>Number($('cooldown').value)*1000){
+          state.lastAlert.set(candidate[0],now);item.alerted=true;
+          addAlert(candidate[0],best.score,{kind:'advanced',detail:`候選標籤連續比對 ${count} 次；與第二名差距 ${Math.round(gap*100)} 個百分點。需人工複核。`});
+        }
+      }
+      advancedNote(`進階候選：疑似${candidate[1]}，相對比對分數 ${Math.round(best.score*100)}%，連續 ${count}/2；需人工複核`);
+    }
+    reflectDetections();
+  }catch(err){
+    console.warn('進階模型無法使用，基本偵測繼續運作',err);
+    state.advancedError=true;
+    state.advancedCandidate=null;state.advancedEvidence=null;
+    advancedNote('進階模型載入或比對失敗；一般偵測仍可使用。請檢查網路、瀏覽器記憶體，或稍後重新勾選。',true);
+    tell('進階模型載入失敗，基本偵測不受影響。',true);
+  }finally{
+    state.advancedBusy=false;
+    if(state.running&&runId===state.session&&$('advancedToggle').checked&&!state.advancedError){
+      state.advancedTimer=setTimeout(()=>startAdvanced(runId),4600);
+    }
+  }
+}
+
 function setupSound(){
   try {if(!state.audio)state.audio=new (window.AudioContext||window.webkitAudioContext)();if(state.audio.state==='suspended')state.audio.resume().catch(()=>{});}catch(_){}
 }
@@ -217,6 +375,7 @@ async function start(){
   if(state.running)return;
   const runId=++state.session;
   state.running=true;state.predictions=[];state.lastSeen.clear();state.lastAlert.clear();
+  state.tracks.clear();state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
   state.lastDetectAt=0; state.detectionHz=0;
   updateControls();updateStatus('busy','連接來源中…');
   $('stageEmpty').hidden=false;$('stageEmpty').querySelector('strong').textContent='正在啟動影像來源…';
@@ -234,10 +393,11 @@ async function start(){
     await loadModel();
     if(runId!==state.session)return;
     $('stageEmpty').hidden=true;$('overlay').style.display='block';$('stageFooter').hidden=false;
-    $('detectorText').textContent='COCO-SSD AI ACTIVE';
+    $('detectorText').textContent='COCO-SSD · 連續影格確認';
     updateStatus('running','偵測運作中');
     drawLoop(runId);
     detectLoop(runId);
+    if($('advancedToggle').checked)startAdvanced(runId);
     tell('已開始偵測，辨識到新的生物類別時將發出警示。');
   }catch(error){
     if(runId!==state.session)return;
@@ -251,12 +411,13 @@ async function start(){
 }
 function stop(changeStatus=true){
   state.running=false;++state.session;
-  clearTimeout(state.timer); cancelAnimationFrame(state.raf);
+  clearTimeout(state.timer);clearTimeout(state.advancedTimer);cancelAnimationFrame(state.raf);
   if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
   els.video.pause();els.video.srcObject=null;els.video.removeAttribute('src');els.video.load();
   els.image.removeAttribute('src');
   if(state.localUrl){URL.revokeObjectURL(state.localUrl);state.localUrl=null;}
   state.source=null;state.predictions=[];state.lastSeen.clear();
+  state.tracks.clear();state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;
   els.ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
   $('overlay').style.display='none'; $('stageFooter').hidden=true;
   $('stageEmpty').hidden=false;
@@ -280,14 +441,15 @@ function frame(){
     const [x,y,w,h]=p.bbox;
     const name=LABELS[p.class][0];
     const boxWidth=Math.max(2,width/380);
-    pen.lineWidth=boxWidth;pen.strokeStyle='#45efc3';pen.strokeRect(x,y,w,h);
-    const txt=`${name} ${Math.round(p.score*100)}%`;
+    pen.lineWidth=boxWidth;pen.strokeStyle=state.tracks.get(p.class)?.confirmed?'#45efc3':'#edcc81';pen.strokeRect(x,y,w,h);
+    const confirmed=state.tracks.get(p.class)?.confirmed;
+    const txt=`${name} · ${Math.round(p.score*100)}% ${confirmed?'已確認':'待連續確認'}`;
     const fontSize=Math.max(15,Math.round(width/65));
     pen.font=`600 ${fontSize}px system-ui,"Noto Sans TC",sans-serif`;
     const tw=pen.measureText(txt).width;
     const labelHeight=fontSize+13;
     const labelTop=Math.max(0,y-labelHeight);
-    pen.fillStyle='#1e6e60e8';pen.fillRect(x,labelTop,tw+17,labelHeight);
+    pen.fillStyle=confirmed?'#1e6e60e8':'#72612be8';pen.fillRect(x,labelTop,tw+17,labelHeight);
     pen.fillStyle='#fff';pen.fillText(txt,x+8,labelTop+fontSize+2);
   }
 }
@@ -307,6 +469,7 @@ async function detectLoop(runId){
       const results=await state.model.detect(state.source,20,Number($('confidence').value)/100);
       if(!state.running||runId!==state.session)return;
       state.predictions=results.filter(wanted);
+      updateTracks(performance.now());
       const now=performance.now();
       const elapsed=Math.max(1,now-startTime);
       state.detectionHz=1000/Math.max(elapsed,now-(state.lastDetectAt||startTime));
@@ -323,42 +486,78 @@ async function detectLoop(runId){
   }
   state.timer=setTimeout(()=>detectLoop(runId),210);
 }
+function bboxSame(a,b){
+  if(!a||!b)return false;
+  const [ax,ay,aw,ah]=a,[bx,by,bw,bh]=b;
+  const ix=Math.max(0,Math.min(ax+aw,bx+bw)-Math.max(ax,bx));
+  const iy=Math.max(0,Math.min(ay+ah,by+bh)-Math.max(ay,by));
+  const inter=ix*iy,union=aw*ah+bw*bh-inter;
+  if(union>0&&inter/union>.16)return true;
+  const dx=(ax+aw/2)-(bx+bw/2),dy=(ay+ah/2)-(by+bh/2);
+  return Math.hypot(dx,dy)<Math.max(aw,ah,bw,bh)*.68;
+}
+function updateTracks(now){
+  const seen=new Set();
+  const best=new Map();
+  state.predictions.forEach(p=>{if(!best.has(p.class)||best.get(p.class).score<p.score)best.set(p.class,p);});
+  for(const [kind,p] of best){
+    const prev=state.tracks.get(kind);
+    const matching=prev&&now-prev.when<2500&&bboxSame(prev.bbox,p.bbox);
+    const count=matching?prev.count+1:1;
+    // Keep an already-confirmed target until it really exits, not just when it moves inside view.
+    const confirmed=count>=Number($('confirmFrames').value);
+    state.tracks.set(kind,{count,confirmed,when:now,bbox:p.bbox,score:p.score,
+      arrivalAt:matching?prev.arrivalAt:now,alerted:matching?prev.alerted:false});
+    seen.add(kind);
+  }
+  for(const [kind,track] of state.tracks){
+    if(!seen.has(kind)&&now-track.when>2700)state.tracks.delete(kind);
+  }
+}
 function reflectDetections(){
   const records=state.predictions;
-  $('currentCount').innerHTML=`${records.length} <span>個</span>`;
+  const advanced=state.advancedCandidate;
+  $('currentCount').innerHTML=`${records.length+(advanced?1:0)} <span>個／候選</span>`;
   const chips=$('detectedChips');chips.replaceChildren();
-  if(!records.length){chips.append(makeChip('目前沒有辨識到指定類別','empty-chip'));$('detectedSummary').textContent='沒有目標';return;}
-  $('detectedSummary').textContent=`共 ${records.length} 個目標`;
-  records.forEach(p=>{const name=LABELS[p.class][0];const chip=makeChip(`${LABELS[p.class][2]} ${name} · ${Math.round(p.score*100)}%`,'detect-chip');chips.append(chip);});
+  if(!records.length&&!advanced){chips.append(makeChip('目前沒有辨識到指定類別','empty-chip'));$('detectedSummary').textContent='沒有目標';return;}
+  $('detectedSummary').textContent=`一般偵測 ${records.length} 個${advanced?' · 進階候選 1 種':''}`;
+  records.forEach(p=>{
+    const meta=LABELS[p.class], track=state.tracks.get(p.class);
+    const chip=makeChip(`${meta[2]} ${meta[0]} · 模型分數 ${Math.round(p.score*100)}% · ${track?.confirmed?'連續確認':'待確認 '+(track?.count||1)+'/'+$('confirmFrames').value}`,'detect-chip'+(track?.confirmed?'':' provisional'));
+    chips.append(chip);
+  });
+  if(advanced){
+    const meta=LABELS[advanced.kind];
+    const chip=makeChip(`${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/2 次 · 待人工複核`,'detect-chip '+(advanced.protected?'protected':'provisional'));
+    chips.append(chip);
+  }
 }
 function decideAlerts(now){
-  const topByClass=new Map();
-  state.predictions.forEach(p=>{if(!topByClass.has(p.class)||topByClass.get(p.class).score<p.score)topByClass.set(p.class,p);});
-  for(const [kind,p] of topByClass){
-    const last=state.lastSeen.get(kind)||0;
+  for(const [kind,track] of state.tracks){
+    if(!track.confirmed||track.alerted||now-track.when>1100)continue;
     const lastAlarm=state.lastAlert.get(kind)||-Infinity;
-    const newArrival=(last===0||now-last>2500);
-    const cooled=now-lastAlarm>Number($('cooldown').value)*1000;
-    state.lastSeen.set(kind,now);
-    if(newArrival&&cooled){state.lastAlert.set(kind,now);addAlert(kind,p.score);}
+    if(now-lastAlarm<=Number($('cooldown').value)*1000)continue;
+    state.lastAlert.set(kind,now);track.alerted=true;
+    addAlert(kind,track.score,{kind:'standard',detail:`連續辨識 ${track.count} 次`});
   }
-  for(const [kind,last] of state.lastSeen){if(!topByClass.has(kind)&&now-last>3000)state.lastSeen.delete(kind);}
 }
-function addAlert(kind,score){
+function addAlert(kind,score,extra={kind:'standard',detail:''}){
   const meta=LABELS[kind];
   if(!meta)return;
   state.alertCount++;$('alertCount').innerHTML=`${state.alertCount} <span>次</span>`;
-  const record={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),when:new Date().toISOString(),className:kind,label:meta[0],score:Math.round(score*100),source:$('sourceType').selectedOptions[0]?.textContent||'鏡頭'};
+  const protectedCandidate=extra.kind==='advanced'&&meta[1]==='protected';
+  const record={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),when:new Date().toISOString(),className:kind,label:meta[0],score:Math.round(score*100),scoreType:extra.kind==='advanced'?'相對候選比對分數':'COCO模型分數',protectedCandidate,source:$('sourceType').selectedOptions[0]?.textContent||'鏡頭',detail:extra.detail||''};
   state.history.unshift(record);state.history=state.history.slice(0,200);
   saveHistory();renderHistory();
-  tell(`${meta[2]} 偵測到「${meta[0]}」！可信度 ${record.score}%`);
+  const alertLabel=extra.kind==='advanced'?'疑似':'偵測到';
+  tell(`${meta[2]} ${alertLabel}「${meta[0]}」！${record.scoreType} ${record.score}%，需人工複核`);
   if($('soundToggle').checked)beep();
   if($('speechToggle').checked&&'speechSynthesis' in window){
-    try{speechSynthesis.cancel();const say=new SpeechSynthesisUtterance(`偵測到${meta[0]}`);say.lang='zh-TW';say.rate=1.08;speechSynthesis.speak(say);}catch(_){}
+    try{speechSynthesis.cancel();const say=new SpeechSynthesisUtterance(`${extra.kind==='advanced'?'疑似':'偵測到'}${meta[0]}`);say.lang='zh-TW';say.rate=1.08;speechSynthesis.speak(say);}catch(_){}
   }
   if('vibrate' in navigator)navigator.vibrate([150,70,150]);
   if('Notification' in window&&Notification.permission==='granted'){
-    try {const n=new Notification('BioWatch 生物偵測警報',{body:`偵測到：${meta[0]}（可信度 ${record.score}%）`,tag:'biowatch-'+kind});setTimeout(()=>n.close(),6500);}catch(_){}
+    try {const n=new Notification('BioWatch 生物偵測警報',{body:`${extra.kind==='advanced'?'疑似':'偵測到'}：${meta[0]}（${record.scoreType} ${record.score}%）`,tag:'biowatch-'+kind});setTimeout(()=>n.close(),6500);}catch(_){}
   }
 }
 function beep(){
@@ -387,15 +586,15 @@ function renderHistory(){
     const item=document.createElement('div');item.className='log-item';
     const icon=document.createElement('div');icon.className='log-icon';icon.textContent=LABELS[record.className][2];
     const desc=document.createElement('div');desc.className='log-description';
-    const title=document.createElement('div');title.className='log-title';title.textContent=`偵測到${record.label}`;
+    const title=document.createElement('div');title.className='log-title';title.textContent=`${record.protectedCandidate?'⚠ 疑似保育類：':'偵測到'}${record.label}${record.protectedCandidate?'（待人工複核）':''}`;
     const time=document.createElement('div');time.className='log-meta';time.textContent=`${new Date(record.when).toLocaleString('zh-TW',{hour12:false})} · ${record.source||'未知來源'}`;
-    const score=document.createElement('div');score.className='score-tag';score.textContent=`${record.score}%`;desc.append(title,time);item.append(icon,desc,score);list.append(item);
+    const score=document.createElement('div');score.className='score-tag';score.textContent=`${record.score}% · ${record.scoreType||'模型分數'}`;desc.append(title,time);item.append(icon,desc,score);list.append(item);
   }
 }
 function csvExport(){
   if(!state.history.length){tell('目前沒有可以匯出的紀錄。');return;}
   const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
-  const rows=[['偵測時間','類別','可信度 (%)','來源'],...state.history.map(x=>[new Date(x.when).toLocaleString('zh-TW',{hour12:false}),x.label,x.score,x.source])];
+  const rows=[['偵測時間','類別','分數 (%)','分數意義','疑似保育類(待人工複核)','來源','確認資訊'],...state.history.map(x=>[new Date(x.when).toLocaleString('zh-TW',{hour12:false}),x.label,x.score,x.scoreType||'模型分數',x.protectedCandidate?'是':'否',x.source,x.detail||''])];
   const blob=new Blob(['\ufeff'+rows.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
   downloadBlob(blob,'BioWatch_警報紀錄_'+new Date().toISOString().slice(0,10)+'.csv');
 }
@@ -417,14 +616,17 @@ function checkNotification(){
 }
 $('sourceType').addEventListener('change',()=>{if(state.running)stop();syncSourceFields();});
 $('confidence').addEventListener('input',updateSliders);
+$('confirmFrames').addEventListener('input',updateSliders);
+$('speciesThreshold').addEventListener('input',updateSliders);
 $('cooldown').addEventListener('input',updateSliders);
+$('advancedToggle').addEventListener('change',()=>{if($('advancedToggle').checked){state.advancedError=false;if(state.running)startAdvanced(state.session);}else{clearTimeout(state.advancedTimer);state.advancedCandidate=null;state.advancedEvidence=null;$('advancedStatus').textContent='已停用進階野生動物比對。';reflectDetections();}});
 $('startBtn').addEventListener('click',start);$('stopBtn').addEventListener('click',()=>stop());
 $('captureBtn').addEventListener('click',capture);
 $('refreshBtn').addEventListener('click',listDevices);
 $('notifyBtn').addEventListener('click',enableNotifications);
 $('exportBtn').addEventListener('click',csvExport);
 $('clearBtn').addEventListener('click',()=>{if(!state.history.length)return;if(confirm('確定清除本機保存的所有警報事件紀錄？')){state.history=[];saveHistory();renderHistory();tell('警報紀錄已清除。');}});
-Object.values(FILTER_IDS).forEach(id=>$(id).addEventListener('change',()=>{if(state.running){state.predictions=state.predictions.filter(wanted);reflectDetections();}}));
+Object.values(FILTER_IDS).forEach(id=>$(id).addEventListener('change',()=>{if(state.running){state.predictions=state.predictions.filter(wanted);if(state.advancedCandidate&&!wanted({class:state.advancedCandidate.kind}))state.advancedCandidate=null;reflectDetections();}}));
 window.addEventListener('beforeunload',()=>{if(state.stream)state.stream.getTracks().forEach(t=>t.stop());});
 if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener('devicechange',listDevices);
 if(location.hostname==='localhost'||location.hostname==='127.0.0.1')$('networkUrl').placeholder=location.origin+'/stream';
