@@ -48,7 +48,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V6.0 · SIX SPECIES</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V6.1 · EXPERIMENT</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -62,7 +62,12 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
   </header>
   <main>
    <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">鏡像鏡頭 · 全球廣域生物候選辨識 <span>↗</span></div></section>
-   <div class="stats">
+   <section aria-label="七類實驗模型測試" style="margin:0 0 17px;padding:15px 19px;border:1px solid #3c685c;background:linear-gradient(115deg,#15362d,#152b32);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap">
+<div><strong style="color:#a6ffdb;font-size:14px">七類專用模型｜實驗照片測試</strong>
+<div style="color:#9bc1b8;font-size:12px;margin-top:5px">已接入你提供照片訓練的模型測試入口；測試正確率 45.9%，暫不作正式警報。</div></div>
+<a href="/experiment.html" style="display:inline-block;background:#45daba;color:#07221b;padding:10px 15px;border-radius:8px;font-size:13px;font-weight:800;text-decoration:none">開啟實驗辨識 →</a>
+</section>
+<div class="stats">
       <div class="stat"><div class="stat-label">目前偵測目標</div><div class="stat-value" id="currentCount">0 <span>個</span></div></div>
       <div class="stat"><div class="stat-label">本次警報次數</div><div class="stat-value" id="alertCount">0 <span>次</span></div></div>
       <div class="stat"><div class="stat-label">AI 辨識速率</div><div class="stat-value" id="fpsValue">— <span>次/秒</span></div></div>
