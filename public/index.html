@@ -1286,30 +1286,44 @@ function addAlert(kind,score,extra={kind:'standard',detail:''}){
   if(!meta)return;
   state.alertCount++;$('alertCount').innerHTML=`${state.alertCount} <span>次</span>`;
   const protectedCandidate=extra.kind==='advanced'&&meta[1]==='protected';
-  const record={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),when:new Date().toISOString(),className:kind,label:meta[0],score:Math.round(score*100),scoreType:extra.kind==='advanced'?'相對候選比對分數':'COCO模型分數',protectedCandidate,source:$('sourceType').selectedOptions[0]?.textContent||'鏡頭',detail:extra.detail||''};
+  const priority=isPrioritySpecies(kind)&&$('focusAlarmToggle').checked;
+  const record={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),when:new Date().toISOString(),className:kind,label:meta[0],score:Math.round(score*100),scoreType:extra.kind==='advanced'?'相對候選比對分數':'COCO模型分數',protectedCandidate,priority,provisional:extra.kind==='advanced',source:$('sourceType').selectedOptions[0]?.textContent||'鏡頭',detail:extra.detail||''};
   state.history.unshift(record);state.history=state.history.slice(0,200);
   saveHistory();renderHistory();
   const alertLabel=extra.kind==='advanced'?'疑似':'偵測到';
-  tell(`${meta[2]} ${alertLabel}「${meta[0]}」！${record.scoreType} ${record.score}%，需人工複核`);
-  if($('soundToggle').checked)beep();
+  tell(`${priority?'🚨 重點警報！ ':''}${meta[2]} ${alertLabel}「${meta[0]}」！${record.scoreType} ${record.score}%，${extra.kind==='advanced'?'此為疑似候選，請人工複核':'請保留影像供必要時複核'}`,priority); 
+  if(priority)showPriorityBanner(meta[0],extra.kind==='advanced');
+  if($('soundToggle').checked)beep(priority);
   if($('speechToggle').checked&&'speechSynthesis' in window){
-    try{speechSynthesis.cancel();const say=new SpeechSynthesisUtterance(`${extra.kind==='advanced'?'疑似':'偵測到'}${meta[0]}`);say.lang='zh-TW';say.rate=1.08;speechSynthesis.speak(say);}catch(_){}
+    try{speechSynthesis.cancel();const say=new SpeechSynthesisUtterance(`${priority?'注意，重點動物警報，':''}${extra.kind==='advanced'?'疑似':'偵測到'}${meta[0]}`);say.lang='zh-TW';say.rate=priority?.96:1.08;speechSynthesis.speak(say);}catch(_){}
   }
-  if('vibrate' in navigator)navigator.vibrate([150,70,150]);
+  if('vibrate' in navigator)navigator.vibrate(priority?[300,110,300,110,500]:[150,70,150]);
   if('Notification' in window&&Notification.permission==='granted'){
-    try {const n=new Notification('BioWatch 生物偵測警報',{body:`${extra.kind==='advanced'?'疑似':'偵測到'}：${meta[0]}（${record.scoreType} ${record.score}%）`,tag:'biowatch-'+kind});setTimeout(()=>n.close(),6500);}catch(_){}
+    try {const n=new Notification(priority?'🚨 BioWatch 七種重點動物警報':'BioWatch 生物偵測警報',{body:`${extra.kind==='advanced'?'疑似':'偵測到'}：${meta[0]}（${record.scoreType} ${record.score}%）`,tag:'biowatch-'+kind,requireInteraction:priority});if(!priority)setTimeout(()=>n.close(),6500);}catch(_){}
   }
 }
-function beep(){
+function showPriorityBanner(name,provisional){
+  const box=$('focusAlertBanner');
+  $('focusAlertTitle').textContent=provisional?'⚠ 高優先疑似：'+name:'🚨 偵測到重點動物：'+name;
+  $('focusAlertDetail').textContent=provisional?'多次候選比對一致，但仍可能誤判，請立即人工複核。':'已通過即時目標追蹤確認，請查看鏡頭畫面。';
+  box.hidden=false;
+  clearTimeout(state.focusBannerTimer);
+  state.focusBannerTimer=setTimeout(()=>box.hidden=true,11500);
+}
+function beep(priority=false){
   try{
     if(!state.audio)setupSound();if(!state.audio||state.audio.state!=='running')return;
     const ctx=state.audio, begin=ctx.currentTime;
-    for(let i=0;i<3;i++){
-      const osc=ctx.createOscillator(),gain=ctx.createGain(),t=begin+i*.23;
-      osc.type='sine';osc.frequency.setValueAtTime(i===1?760:950,t);
-      gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(.16,t+.015);
-      gain.gain.exponentialRampToValueAtTime(.0001,t+.18);
-      osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.20);
+    const number=priority?7:3;
+    const interval=priority?.19:.23;
+    for(let i=0;i<number;i++){
+      const osc=ctx.createOscillator(),gain=ctx.createGain(),t=begin+i*interval;
+      osc.type=priority?'triangle':'sine';
+      osc.frequency.setValueAtTime(priority?(i%2?920:1150):(i===1?760:950),t);
+      gain.gain.setValueAtTime(.0001,t);
+      gain.gain.exponentialRampToValueAtTime(priority?.23:.16,t+.018);
+      gain.gain.exponentialRampToValueAtTime(.0001,t+(priority?.16:.18));
+      osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.21);
     }
   }catch(err){console.warn('音效無法播放',err);}
 }
@@ -1326,7 +1340,7 @@ function renderHistory(){
     const item=document.createElement('div');item.className='log-item';
     const icon=document.createElement('div');icon.className='log-icon';icon.textContent=LABELS[record.className]?.[2]||'🔎';
     const desc=document.createElement('div');desc.className='log-description';
-    const title=document.createElement('div');title.className='log-title';title.textContent=`${record.protectedCandidate?'⚠ 疑似保育類：':'偵測到'}${record.label}${record.protectedCandidate?'（待人工複核）':''}`;
+    const title=document.createElement('div');title.className='log-title';title.textContent=`${record.priority?'🚨 重點：':''}${record.provisional?'疑似':'偵測到'}${record.label}${record.provisional?'（待人工複核）':''}`;
     const time=document.createElement('div');time.className='log-meta';time.textContent=`${new Date(record.when).toLocaleString('zh-TW',{hour12:false})} · ${record.source||'未知來源'}`;
     const score=document.createElement('div');score.className='score-tag';score.textContent=`${record.score}% · ${record.scoreType||'模型分數'}`;
     const actions=document.createElement('div');actions.className='log-review-actions';
@@ -1347,7 +1361,7 @@ function renderHistory(){
 function csvExport(){
   if(!state.history.length){tell('目前沒有可以匯出的紀錄。');return;}
   const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
-  const rows=[['偵測時間','類別','分數 (%)','分數意義','疑似保育類(待人工複核)','來源','確認資訊','人工複核'],...state.history.map(x=>[new Date(x.when).toLocaleString('zh-TW',{hour12:false}),x.label,x.score,x.scoreType||'模型分數',x.protectedCandidate?'是':'否',x.source,x.detail||'',x.review==='false'?'誤判':x.review==='correct'?'正確':'未複核'])];
+  const rows=[['偵測時間','類別','分數 (%)','分數意義','七種重點警報','疑似候選','來源','確認資訊','人工複核'],...state.history.map(x=>[new Date(x.when).toLocaleString('zh-TW',{hour12:false}),x.label,x.score,x.scoreType||'模型分數',x.priority?'是':'否',x.provisional?'是':'否',x.source,x.detail||'',x.review==='false'?'誤判':x.review==='correct'?'正確':'未複核'])];
   const blob=new Blob(['\ufeff'+rows.map(row=>row.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
   downloadBlob(blob,'BioWatch_警報紀錄_'+new Date().toISOString().slice(0,10)+'.csv');
 }
@@ -1367,6 +1381,7 @@ function checkNotification(){
   $('notifyBtn').textContent=Notification.permission==='granted'?'桌面通知已啟用':'啟用桌面通知';
   $('notifyBtn').disabled=Notification.permission==='granted';
 }
+$('focusAlertDismiss').addEventListener('click',()=>{$('focusAlertBanner').hidden=true;clearTimeout(state.focusBannerTimer);});
 $('sourceType').addEventListener('change',()=>{if(state.running)stop();syncSourceFields();});
 $('mirrorToggle').addEventListener('change',()=>{try{localStorage.setItem('biowatch_mirror',String($('mirrorToggle').checked));}catch(_){}});
 $('advancedScope').addEventListener('change',advancedScopeChanged);
@@ -1379,6 +1394,10 @@ $('stationaryToggle').addEventListener('change',advancedScopeChanged);
 $('debugPredictions').addEventListener('change',()=>{
   reflectDetections();
   if($('debugPredictions').checked)tell('已顯示 AI 原始待驗證候選，這些框不代表確認有生物。');
+});
+$('focusAlarmToggle').addEventListener('change',()=>{
+  if(!$('focusAlarmToggle').checked)$('focusAlertBanner').hidden=true;
+  tell($('focusAlarmToggle').checked?'七種動物的強化警報已啟用。':'已停用強化警報，仍保留一般偵測。');
 });
 $('precisionProfile').addEventListener('change',()=>{
   const p=$('precisionProfile').value;
