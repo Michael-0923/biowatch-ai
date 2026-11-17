@@ -556,7 +556,7 @@ const state = {
   source:null, localUrl:null, predictions:[], lastSeen:new Map(), lastAlert:new Map(),
   alertCount:0, detectionHz:0, lastDetectAt:0, raf:0, timer:0, lastDrawAt:0, audio:null,
   history:[], notificationReady:false,
-  tracks:new Map(), nextTrackId:1, motionFrame:null, motionState:null, advancedModel:null, advancedLoading:null, advancedError:false,
+  tracks:new Map(), nextTrackId:1, motionFrame:null, motionState:null, motionRegion:null, lastSceneSample:0, advancedModel:null, advancedLoading:null, advancedError:false,
   advancedCandidate:null, advancedEvidence:null, advancedBusy:false,
   advancedTimer:0, advancedFrame:null, lastMotion:0
 };
@@ -821,20 +821,48 @@ async function loadAdvancedModel(){
   }
   return state.advancedLoading;
 }
+// Detect local motion proposals without requiring COCO-SSD to recognize a rare animal.
+// Motion is only evidence for taking a crop, NEVER proof of species.
 function sceneChange(){
-  const dims=getDims();if(!dims)return false;
-  const c=document.createElement('canvas');c.width=80;c.height=48;
-  const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(state.source,0,0,80,48);
-  const pixels=g.getImageData(0,0,80,48).data,prev=state.advancedFrame;
-  state.advancedFrame=new Uint8ClampedArray(pixels);
-  if(!prev)return false;
-  let changed=0,total=0;
-  for(let i=0;i<pixels.length;i+=16){
-    total++;
-    const r=Math.abs(pixels[i]-prev[i]),b=Math.abs(pixels[i+1]-prev[i+1]),g=Math.abs(pixels[i+2]-prev[i+2]);
-    if((r+b+g)/3>20)changed++;
-  }
-  return changed/Math.max(1,total)>.035;
+  try{
+    const dims=getDims();if(!dims)return false;
+    const width=96,height=64;
+    const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(state.source,0,0,width,height);
+    const rgba=ctx.getImageData(0,0,width,height).data;
+    const gray=new Uint8Array(width*height);
+    for(let i=0;i<gray.length;i++){
+      const off=i*4;gray[i]=Math.round(.2126*rgba[off]+.7152*rgba[off+1]+.0722*rgba[off+2]);
+    }
+    const previous=state.advancedFrame;state.advancedFrame=gray;
+    if(!previous||previous.length!==gray.length)return false;
+    let changed=0,x0=width,y0=height,x1=0,y1=0;
+    for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+      const k=y*width+x;
+      if(Math.abs(gray[k]-previous[k])<26)continue;
+      changed++;x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);
+    }
+    const ratio=changed/gray.length;
+    // Reject static noise, scene-wide exposure changes and camera shake.
+    if(changed<26||ratio>.30)return false;
+    const bw=x1-x0+1,bh=y1-y0+1;
+    if(bw<4||bh<4||bw*bh/(width*height)>.55)return false;
+    const margin=Math.max(3,Math.round(Math.max(bw,bh)*.2));
+    x0=Math.max(0,x0-margin);y0=Math.max(0,y0-margin);
+    x1=Math.min(width,x1+margin);y1=Math.min(height,y1+margin);
+    const box=[x0*dims[0]/width,y0*dims[1]/height,(x1-x0)*dims[0]/width,(y1-y0)*dims[1]/height];
+    if(box[2]<16||box[3]<16)return false;
+    const now=performance.now();
+    state.motionRegion={box,when:now};
+    state.lastMotion=now;
+    return true;
+  }catch(e){console.warn('移動區域分析失敗',e);return false;}
+}
+function recentMotionRegion(){
+  const region=state.motionRegion;
+  if(!region||performance.now()-region.when>5200)return null;
+  return region.box;
 }
 function confirmedAnimalTarget(){
   const candidates=state.predictions.filter(p=>p.class!=='person'&&state.tracks.get(p.trackId)?.confirmed);
@@ -846,8 +874,9 @@ function snapshotForAdvanced(){
   const animal=$('precisionProfile').value==='strict' ? confirmedAnimalTarget() : animals[0];
   const [width,height]=dims;
   let sx=0,sy=0,sw=width,sh=height;
-  if(animal){
-    const [x,y,w,h]=animal.bbox,margin=Math.max(w,h)*.16;
+  const proposed=animal?.bbox||recentMotionRegion();
+  if(proposed){
+    const [x,y,w,h]=proposed,margin=Math.max(w,h)*.16;
     sx=Math.max(0,x-margin);sy=Math.max(0,y-margin);
     sw=Math.min(width-sx,w+margin*2);sh=Math.min(height-sy,h+margin*2);
     if(sw<15||sh<15){sx=0;sy=0;sw=width;sh=height;}
@@ -913,19 +942,21 @@ async function startAdvanced(runId){
   state.advancedBusy=true;
   try{
     const strict=$('precisionProfile').value==='strict';
-    // A CLIP candidate by itself does not establish that a living organism exists.
-    // Prevent the common empty-scene -> rare-species hallucination.
-    if(strict&&!confirmedAnimalTarget()){
+    // Sample movement before model loading; wildlife often lacks a COCO class.
+    const moving=sceneChange();
+    const staticFile=$('sourceType').value==='file'&&state.source?.tagName==='IMG';
+    const hasAnimal=state.predictions.some(p=>p.class!=='person');
+    const hasReliableAnimal=Boolean(confirmedAnimalTarget());
+    const motionCrop=recentMotionRegion();
+    const allowStatic=staticFile||$('stationaryToggle').checked;
+    if(strict&&!hasReliableAnimal&&!motionCrop&&!allowStatic){
       state.advancedCandidate=null;state.advancedEvidence=null;
-      advancedNote('先確認生物存在：一般模型尚無通過追蹤驗證的動物，暫停猜測物種。');
+      advancedNote('等待有效動物目標或局部移動；避免空景硬猜物種。');
       reflectDetections();return;
     }
     const model=await loadAdvancedModel();
     if(!state.running||runId!==state.session||!$('advancedToggle').checked)return;
-    advancedNote('已確認動物目標，正在比對物種候選（非正式鑑定）');
-    const moving=sceneChange();
-    const staticFile=$('sourceType').value==='file'&&state.source?.tagName==='IMG';
-    const hasAnimal=state.predictions.some(p=>p.class!=='person');
+    advancedNote(hasReliableAnimal?'已驗證動物目標，正在比對物種候選…':'已取得局部移動區域，正在比對疑似生物候選…');
     if($('precisionProfile').value==='strict'){
       const quality=imageQuality();
       if(!quality.good){
@@ -936,7 +967,7 @@ async function startAdvanced(runId){
     }
     // The full-scene classifier must not continuously turn an empty static landscape into a "rare animal".
     if(moving)state.lastMotion=performance.now();
-    if(!staticFile&&!hasAnimal&&!$('stationaryToggle').checked&&performance.now()-state.lastMotion>7000){
+    if(!staticFile&&!hasAnimal&&!motionCrop&&!$('stationaryToggle').checked){
       state.advancedCandidate=null;state.advancedEvidence=null;reflectDetections();return;
     }
     const data=snapshotForAdvanced();if(!data)return;
@@ -945,10 +976,11 @@ async function startAdvanced(runId){
     const sorted=comparison.results,best=sorted[0],runner=sorted[1];
     const candidate=best&&comparison.choicesMap?.get(best.label);
     const profile=$('precisionProfile').value;
+    const priorityCandidate=Boolean(candidate&&isPrioritySpecies(candidate[0]));
     const isProtected=candidate?.[2]==='protected';
     const minScore=Math.max(Number($('speciesThreshold').value)/100,
-      profile==='strict'?(isProtected?.34:.28):profile==='balanced'?.18:.12);
-    const minGap=profile==='strict'?(isProtected?.14:.11):profile==='balanced'?.07:.045;
+      profile==='strict'?(isProtected||priorityCandidate?.34:.28):profile==='balanced'?.18:.12);
+    const minGap=profile==='strict'?(isProtected||priorityCandidate?.14:.11):profile==='balanced'?.07:.045;
     const gap=best ? best.score-(runner?.score||0) : 0;
     if(!candidate||best.score<minScore||gap<minGap||!wanted({class:candidate[0]})){
       state.advancedCandidate=null;state.advancedEvidence=null;
@@ -963,14 +995,16 @@ async function startAdvanced(runId){
       const item={kind:candidate[0],score:best.score,count,protected:candidate[2]==='protected',alerted:wasAlerted};
       state.advancedEvidence=item;state.advancedCandidate=item;
       const required=$('precisionProfile').value==='strict'?4:2;
-      if(count>=required&&!wasAlerted&&$('speciesAlertToggle').checked){
+      const priorityWild=priorityCandidate&&candidate[0]!=='cat'&&candidate[0]!=='dog';
+      const priorityAlert=priorityWild&&$('focusAlarmToggle').checked;
+      if(count>=required&&!wasAlerted&&(priorityAlert||$('speciesAlertToggle').checked)){
         const now=performance.now(),last=state.lastAlert.get(candidate[0])||-Infinity;
         if(now-last>Number($('cooldown').value)*1000){
           state.lastAlert.set(candidate[0],now);item.alerted=true;
           addAlert(candidate[0],best.score,{kind:'advanced',detail:`候選標籤連續比對 ${count} 次；與第二名差距 ${Math.round(gap*100)} 個百分點。需人工複核。`});
         }
       }
-      advancedNote(`進階候選：${comparison.familyName||'自訂／臺灣'} · 疑似${candidate[1]}，相對比對 ${Math.round(best.score*100)}%，連續 ${count}/${required}；${$('speciesAlertToggle').checked?'啟用實驗警報':'僅顯示候選，不自動警報'}；需人工複核`);
+      advancedNote(`進階候選：${comparison.familyName||'自訂／臺灣'} · ${priorityCandidate?'⚠ 重點疑似':'疑似'}${candidate[1]}，相對比對 ${Math.round(best.score*100)}%，連續 ${count}/${required}；${priorityAlert?'連續驗證後強化警報':$('speciesAlertToggle').checked?'實驗性一般警報':'僅供人工複核'}`);
     }
     reflectDetections();
   }catch(err){
@@ -994,7 +1028,7 @@ async function start(){
   if(state.running)return;
   const runId=++state.session;
   state.running=true;state.predictions=[];state.lastSeen.clear();state.lastAlert.clear();
-  state.tracks.clear();state.nextTrackId=1;state.motionFrame=null;state.motionState=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
+  state.tracks.clear();state.nextTrackId=1;state.motionFrame=null;state.motionState=null;state.motionRegion=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
   state.lastDetectAt=0; state.detectionHz=0;
   updateControls();updateStatus('busy','連接來源中…');
   $('stageEmpty').hidden=false;$('stageEmpty').querySelector('strong').textContent='正在啟動影像來源…';
@@ -1037,7 +1071,7 @@ function stop(changeStatus=true){
   els.image.removeAttribute('src');
   if(state.localUrl){URL.revokeObjectURL(state.localUrl);state.localUrl=null;}
   state.source=null;state.predictions=[];state.lastSeen.clear();
-  state.tracks.clear();state.motionFrame=null;state.motionState=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;
+  state.tracks.clear();state.motionFrame=null;state.motionState=null;state.motionRegion=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;
   els.ctx.clearRect(0,0,els.canvas.width,els.canvas.height);
   $('overlay').style.display='none'; $('stageFooter').hidden=true;
   $('stageEmpty').hidden=false;
@@ -1137,6 +1171,9 @@ async function detectLoop(runId){
       if(!state.running||runId!==state.session)return;
       const dims=getDims(),strict=$('precisionProfile').value==='strict';
       const movement=motionEvidence();
+      if(performance.now()-state.lastSceneSample>=450){
+        state.lastSceneSample=performance.now();sceneChange();
+      }
       state.predictions=results.filter(p=>{
         if(!wanted(p))return false;
         if(!strict||!dims)return true;
@@ -1230,7 +1267,7 @@ function reflectDetections(){
   });
   if(advanced){
     const meta=LABELS[advanced.kind];
-    const chip=makeChip(`${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/${$('precisionProfile').value==='strict'?4:2} 次 · 待人工複核`,'detect-chip '+(advanced.protected?'protected':'provisional'));
+    const chip=makeChip(`${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/${$('precisionProfile').value==='strict'?4:2} 次 · 待人工複核`,'detect-chip '+(isPrioritySpecies(advanced.kind)?'focus-provisional':advanced.protected?'protected':'provisional'));
     chips.append(chip);
   }
 }
