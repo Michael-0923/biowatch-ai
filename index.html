@@ -126,7 +126,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
         <select id="advancedScope"><option value="world" selected>全球廣域（預設）：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="six">僅比對七種重點動物（選用）</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
         <p class="scope-explain" id="scopeDescription">全球模式先比對生物大類再比對支援的物種候選；七種重點動物另有強化警報，無法保證辨識所有物種。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
-        <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
+        <label class="toggle-line"><span><strong>靜態生物分析（選用）</strong><small>辨識靜止植物、真菌或停棲動物時可開啟；預設關閉以減少空景誤判及運算負擔。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
         <p class="hint" id="advancedStatus" aria-live="polite">全球候選分析預設開啟；一般動物由即時模型偵測，其他物種透過進階 AI 候選比對。</p><p class="hint" id="precisionStatus" aria-live="polite">V7.0：全球廣域候選 + 七種動物強化警報。候選物種不能視為可靠鑑定。</p>
        <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
@@ -136,7 +136,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
     </aside>
    </div>
    <section class="panel history-panel"><div class="panel-head history-head"><div><div class="panel-kicker">ACTIVITY LOG</div><h3>警報事件紀錄 <span id="historyCount" class="history-count">0</span></h3></div><div class="history-actions"><button class="secondary small" id="exportBtn">匯出 CSV</button><button class="secondary small" id="clearBtn">清除紀錄</button></div></div><p class="hint review-help">每筆警報可標記「正確／誤判」，便於匯出實際測試結果；這不會自行重新訓練 AI。</p><div class="log-list" id="logList"><div class="log-empty">目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。</div></div></section>
-   <section class="notice"><strong>先偵測動物，再猜測候選物種：避免空景誤判</strong><p>一般即時目標框使用 COCO-SSD，僅支援固定的少數動物與人。進階全球模式使用 CLIP 先比對生物門類，再於目前內建的多種候選物種中找相似影像，包括哺乳類、鳥類、爬蟲類、兩棲類、魚類、昆蟲、蜘蛛與其他節肢動物、海洋無脊椎動物、植物及真菌，也可自行輸入額外英文／學名。<strong>這不是全世界所有物種的辨識資料庫；未知、新發現、微生物，以及畫質不足的生物都可能無法辨識。</strong></p><p>「疑似物種」及顯示的百分比只是候選之間的相對比較分數，<strong>並非可信度保證、真正機率、法定保育類鑑定或已確認物種。</strong> 任何保育類、罕見生物都需要保留原始影像並交由專家複核。植物與真菌可能是靜止目標，啟用靜態分析會增加誤報可能。瀏覽器必須保持開啟；模型下載需網路與裝置資源。一般鏡頭不能辨識肉眼不可見的微生物。</p></section>
+   <section class="notice"><strong>廣域辨識與七種優先警報的準確性限制</strong><p>一般即時目標框使用 COCO-SSD，僅支援固定的少數動物與人。進階全球模式使用 CLIP 先比對生物門類，再於目前內建的多種候選物種中找相似影像，包括哺乳類、鳥類、爬蟲類、兩棲類、魚類、昆蟲、蜘蛛與其他節肢動物、海洋無脊椎動物、植物及真菌，也可自行輸入額外英文／學名。<strong>這不是全世界所有物種的辨識資料庫；未知、新發現、微生物，以及畫質不足的生物都可能無法辨識。</strong></p><p>「疑似物種」及顯示的百分比只是候選之間的相對比較分數，<strong>並非可信度保證、真正機率、法定保育類鑑定或已確認物種。</strong> 任何保育類、罕見生物都需要保留原始影像並交由專家複核。植物與真菌可能是靜止目標，啟用靜態分析會增加誤報可能。瀏覽器必須保持開啟；模型下載需網路與裝置資源。一般鏡頭不能辨識肉眼不可見的微生物。</p></section>
   </main>
   <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。 <a href="/experiment.html" style="color:#7b9ba8">實驗照片測試</a></footer>
  </div>
@@ -992,7 +992,7 @@ async function startAdvanced(runId){
       const prev=state.advancedEvidence;
       const count=prev?.kind===candidate[0]?Math.min(prev.count+1,8):1;
       const wasAlerted=prev?.kind===candidate[0]&&prev.alerted;
-      const item={kind:candidate[0],score:best.score,count,protected:candidate[2]==='protected',alerted:wasAlerted};
+      const item={kind:candidate[0],score:best.score,count,protected:candidate[2]==='protected',priority:priorityCandidate,alerted:wasAlerted};
       state.advancedEvidence=item;state.advancedCandidate=item;
       const required=$('precisionProfile').value==='strict'?4:2;
       const priorityWild=priorityCandidate&&candidate[0]!=='cat'&&candidate[0]!=='dog';
@@ -1028,7 +1028,7 @@ async function start(){
   if(state.running)return;
   const runId=++state.session;
   state.running=true;state.predictions=[];state.lastSeen.clear();state.lastAlert.clear();
-  state.tracks.clear();state.nextTrackId=1;state.motionFrame=null;state.motionState=null;state.motionRegion=null;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
+  state.tracks.clear();state.nextTrackId=1;state.motionFrame=null;state.motionState=null;state.motionRegion=null;state.lastSceneSample=0;state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=0;
   state.lastDetectAt=0; state.detectionHz=0;
   updateControls();updateStatus('busy','連接來源中…');
   $('stageEmpty').hidden=false;$('stageEmpty').querySelector('strong').textContent='正在啟動影像來源…';
@@ -1065,7 +1065,8 @@ async function start(){
 }
 function stop(changeStatus=true){
   state.running=false;++state.session;
-  clearTimeout(state.timer);clearTimeout(state.advancedTimer);cancelAnimationFrame(state.raf);
+  clearTimeout(state.timer);clearTimeout(state.advancedTimer);clearTimeout(state.focusBannerTimer);cancelAnimationFrame(state.raf);
+  $('focusAlertBanner').hidden=true;
   if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
   els.video.pause();els.video.srcObject=null;els.video.removeAttribute('src');els.video.load();
   els.image.removeAttribute('src');
@@ -1102,16 +1103,17 @@ function frame(){
     const drawX=mirrored?width-x-w:x;
     const name=LABELS[p.class][0];
     const boxWidth=Math.max(2,width/380);
-    pen.lineWidth=boxWidth;pen.strokeStyle=state.tracks.get(p.trackId)?.confirmed?'#45efc3':'#edcc81';pen.strokeRect(drawX,y,w,h);
+    const priorityFrame=Boolean(isPrioritySpecies(p.class)&&$('focusAlarmToggle').checked&&state.tracks.get(p.trackId)?.confirmed);
+    pen.lineWidth=priorityFrame?Math.max(4,boxWidth*2):boxWidth;pen.strokeStyle=priorityFrame?'#ff8d62':state.tracks.get(p.trackId)?.confirmed?'#45efc3':'#edcc81';pen.strokeRect(drawX,y,w,h);
     const confirmed=state.tracks.get(p.trackId)?.confirmed;
-    const txt=`${name} · ${Math.round(p.score*100)}% ${confirmed?'多次確認':'待驗證'}`;
+    const txt=`${priorityFrame?'🚨 重點 ':''}${name} · ${Math.round(p.score*100)}% ${confirmed?'多次確認':'待驗證'}`;
     const fontSize=Math.max(15,Math.round(width/65));
     pen.font=`600 ${fontSize}px system-ui,"Noto Sans TC",sans-serif`;
     const tw=pen.measureText(txt).width;
     const labelHeight=fontSize+13;
     const labelTop=Math.max(0,y-labelHeight);
     const labelX=Math.max(0,Math.min(width-(tw+17),drawX));
-    pen.fillStyle=confirmed?'#1e6e60e8':'#72612be8';pen.fillRect(labelX,labelTop,tw+17,labelHeight);
+    pen.fillStyle=priorityFrame?'#953a28ed':confirmed?'#1e6e60e8':'#72612be8';pen.fillRect(labelX,labelTop,tw+17,labelHeight);
     pen.fillStyle='#fff';pen.fillText(txt,labelX+8,labelTop+fontSize+2);
   }
 }
@@ -1267,7 +1269,7 @@ function reflectDetections(){
   });
   if(advanced){
     const meta=LABELS[advanced.kind];
-    const chip=makeChip(`${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/${$('precisionProfile').value==='strict'?4:2} 次 · 待人工複核`,'detect-chip '+(isPrioritySpecies(advanced.kind)?'focus-provisional':advanced.protected?'protected':'provisional'));
+    const chip=makeChip(`${isPrioritySpecies(advanced.kind)?'⚠ 重點疑似 · ':''}${meta[2]} 疑似${meta[0]} · 候選比對 ${Math.round(advanced.score*100)}% · ${advanced.count}/${$('precisionProfile').value==='strict'?4:2} 次 · 待人工複核`,'detect-chip '+(isPrioritySpecies(advanced.kind)?'focus-provisional':advanced.protected?'protected':'provisional'));
     chips.append(chip);
   }
 }
