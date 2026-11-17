@@ -43,12 +43,18 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
 .review-btn[aria-pressed="true"]{border-color:#57dfb7;color:#b1ffe4;background:#1b4a3e}
 .review-btn.false[aria-pressed="true"]{border-color:#f59f95;color:#ffe7d9;background:#5b3535}
 @media(max-width:680px){.log-item{flex-wrap:wrap}.log-review-actions{width:100%}}
+/* World watch and priority feedback. */
+.world-monitor-note{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:17px;padding:14px 17px;border:1px solid #346c5c;background:#17352e;border-radius:10px}.world-monitor-note strong{color:#b1ffe6}.world-monitor-note span{font-size:12px;color:#b5d4ce}
+.focus-alert-banner{position:absolute;top:10px;left:10px;right:10px;z-index:15;background:#84291df4;border:2px solid #ffc29a;color:white;border-radius:12px;padding:15px;box-shadow:0 0 0 5px #ff684738;display:flex;align-items:center;gap:12px;animation:warningPulse .8s ease-in-out infinite alternate}
+.focus-alert-banner[hidden]{display:none!important}.focus-alert-banner>span{font-size:30px}.focus-alert-banner strong{font-size:clamp(16px,2.6vw,26px)}.focus-alert-banner div div{font-size:12px;margin-top:5px}.focus-alert-banner button{margin-left:auto;background:#421b19;color:white;border:1px solid #ffbeab;border-radius:8px;padding:7px 12px}.detect-chip.focus-provisional{border-color:#e8b078;background:#553a26;color:#ffe4bc}
+@keyframes warningPulse{from{border-color:#ffc29a}to{border-color:#ff6548;box-shadow:0 0 0 9px #f45f3b48}}
+@media(prefers-reduced-motion:reduce){.focus-alert-banner{animation:none}}@media(max-width:680px){.focus-alert-banner{top:6px;left:6px;right:6px;padding:8px}.focus-alert-banner>span{font-size:21px}}
 </style>
 </head>
 <body>
  <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V6.1 · EXPERIMENT</div><h1>AI 生物偵測警報系統</h1></div></div>
+    <div class="brand"><div class="brand-icon" aria-hidden="true">◈</div><div><div class="brand-kicker">BIOWATCH / V7.0 · WORLD WATCH</div><h1>AI 生物偵測警報系統</h1></div></div>
     <div class="top-status"><span class="status-dot" id="statusDot"></span><span id="topStatus">尚未啟動</span><span class="status-divider"></span><span class="local-badge">裝置端辨識</span><button type="button" id="pageFullscreenBtn" class="secondary fullscreen-page-btn" aria-pressed="false" title="切換整個網站全螢幕">⛶ 網站全螢幕</button></div>
     <section class="auth-panel" aria-label="Google 帳號登入">
       <div id="googleAuthButton" class="auth-google-button" hidden></div>
@@ -62,12 +68,8 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
   </header>
   <main>
    <section class="intro"><div><p class="eyebrow">LIVE INTELLIGENCE · 即時監控</p><h2>當有生物經過，就讓你知道。</h2><p>使用電腦或手機鏡頭，自動標出目標、發出警報並留下事件紀錄。</p></div><div class="supported-label">鏡像鏡頭 · 全球廣域生物候選辨識 <span>↗</span></div></section>
-   <section aria-label="七類實驗模型測試" style="margin:0 0 17px;padding:15px 19px;border:1px solid #3c685c;background:linear-gradient(115deg,#15362d,#152b32);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap">
-<div><strong style="color:#a6ffdb;font-size:14px">七類專用模型｜實驗照片測試</strong>
-<div style="color:#9bc1b8;font-size:12px;margin-top:5px">已接入你提供照片訓練的模型測試入口；測試正確率 45.9%，暫不作正式警報。</div></div>
-<a href="/experiment.html" style="display:inline-block;background:#45daba;color:#07221b;padding:10px 15px;border-radius:8px;font-size:13px;font-weight:800;text-decoration:none">開啟實驗辨識 →</a>
-</section>
-<div class="stats">
+   <div class="world-monitor-note" role="note"><strong>🌍 全球廣域鏡頭監控</strong><span>一般生物正常偵測，七種重點動物強化警報；物種比對為候選判斷，並非真正全物種鑑定。</span></div>
+    <div class="stats">
       <div class="stat"><div class="stat-label">目前偵測目標</div><div class="stat-value" id="currentCount">0 <span>個</span></div></div>
       <div class="stat"><div class="stat-label">本次警報次數</div><div class="stat-value" id="alertCount">0 <span>次</span></div></div>
       <div class="stat"><div class="stat-label">AI 辨識速率</div><div class="stat-value" id="fpsValue">— <span>次/秒</span></div></div>
@@ -75,7 +77,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
    <div class="main-layout">
     <section class="panel video-panel" aria-labelledby="previewHeading">
      <div class="panel-head"><div><div class="panel-kicker">CAMERA FEED</div><h3 id="previewHeading">即時鏡頭畫面</h3></div><div class="live-pill" id="livePill"><span class="small-dot"></span><span id="liveText">待機</span></div></div>
-     <div class="video-stage" id="videoStage"><button type="button" id="stageFullscreenExit" class="stage-fullscreen-exit" aria-label="離開鏡頭全螢幕" title="離開全螢幕">✕　離開全螢幕</button>
+     <div class="video-stage" id="videoStage"><div id="focusAlertBanner" class="focus-alert-banner" role="alert" aria-live="assertive" hidden><span>🚨</span><div><strong id="focusAlertTitle">重點動物警報</strong><div id="focusAlertDetail">請複核畫面</div></div><button type="button" id="focusAlertDismiss" aria-label="關閉警示">✕</button></div><button type="button" id="stageFullscreenExit" class="stage-fullscreen-exit" aria-label="離開鏡頭全螢幕" title="離開全螢幕">✕　離開全螢幕</button>
        <video id="inputVideo" playsinline muted autoplay></video>
        <img id="inputImage" alt="網路攝影機影像" crossorigin="anonymous">
        <canvas id="overlay" aria-label="AI 物件偵測畫面"></canvas>
@@ -103,27 +105,29 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
         <div class="range-heading"><label for="confidence" class="field-label">一般偵測模型分數門檻</label><strong id="confidenceValue">80%</strong></div><input id="confidence" type="range" min="40" max="95" step="5" value="80"><div class="range-ends"><span>較敏感</span><span>較嚴格</span></div>
        <div class="range-heading cooldown-heading"><label for="confirmFrames" class="field-label">連續出現幾次才警報</label><strong id="confirmFramesValue">5 次</strong></div><input id="confirmFrames" type="range" min="2" max="8" step="1" value="5"><p class="hint">要求同一類目標在相近位置連續被辨識，以降低瞬間誤報（可能延遲警報或漏掉快速經過的動物）。</p>
        <div class="range-heading cooldown-heading"><label for="cooldown" class="field-label">同類警報冷卻時間</label><strong id="cooldownValue">15 秒</strong></div><input id="cooldown" type="range" min="5" max="120" step="5" value="15"><div class="range-ends"><span>5 秒</span><span>120 秒</span></div>
-       <div class="subheading" id="sixTargetTitle">指定六種動物（預設全選）</div>
+       <div class="subheading" id="sixTargetTitle">七種重點動物（強化警報，預設全選）</div>
         <div class="check-grid" id="sixTargetChecks">
           <label class="check"><input id="focusCivet" type="checkbox" checked><span>🦨 麝香貓</span></label>
           <label class="check"><input id="focusPangolin" type="checkbox" checked><span>🦔 穿山甲</span></label>
           <label class="check"><input id="focusMongoose" type="checkbox" checked><span>🦦 食蟹獴</span></label>
           <label class="check"><input id="focusMasked" type="checkbox" checked><span>🦝 白鼻心</span></label>
+          <label class="check"><input id="focusFerret" type="checkbox" checked><span>🦡 鼬獾</span></label>
           <label class="check"><input id="focusCat" type="checkbox" checked><span>🐱 貓</span></label>
           <label class="check"><input id="focusDog" type="checkbox" checked><span>🐶 狗</span></label>
         </div>
-        <p class="hint" id="focusWarning">貓、狗使用即時物件偵測；其他四種屬進階 AI 疑似候選，無法保證鑑定正確。</p>
-        <div class="subheading" id="legacyTitle" hidden>其他生物類別（實驗）</div>
-       <div class="check-grid" id="legacyFilters" hidden><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
+        <p class="hint" id="focusWarning">貓狗由一般模型確認；其他五種野生動物的物種判斷屬於「疑似候選」，需連續驗證與人工複核。</p>
+        <label class="toggle-line"><span><strong>🚨 七種動物強化警報</strong><small>預設開啟：紅色橫幅、強化音效、較長震動與優先通知。野生物種候選仍明確標示「疑似」。</small></span><input id="focusAlarmToggle" type="checkbox" checked role="switch"></label>
+        <div class="subheading" id="legacyTitle">一般廣域偵測類別</div>
+       <div class="check-grid" id="legacyFilters"><label class="check"><input id="filterPerson" type="checkbox" checked><span>人</span></label><label class="check"><input id="filterPets" type="checkbox" checked><span>貓、狗</span></label><label class="check"><input id="filterBird" type="checkbox" checked><span>鳥類</span></label><label class="check"><input id="filterWild" type="checkbox" checked><span>其他大型動物</span></label><label class="check"><input id="filterProtected" type="checkbox" checked><span>保育類候選</span></label><label class="check"><input id="filterOther" type="checkbox" checked><span>其他野生動物</span></label></div>
        <div class="divider"></div>
-        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>六類模式可針對移動區域補充推測四種野生動物，首次需下載額外模型；不等於正式鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
-        <label class="toggle-line"><span><strong>讓疑似物種直接發出警報（實驗）</strong><small>預設關閉。CLIP 不是經校準的物種辨識器，建議先人工複核候選結果。</small></span><input type="checkbox" id="speciesAlertToggle" role="switch"></label>
+        <label class="toggle-line"><span><strong>物種候選分析（實驗）</strong><small>全球模式以動態區域輔助比對更多生物候選，首次需下載額外模型；不是完整物種鑑定。</small></span><input type="checkbox" id="advancedToggle" role="switch" checked></label>
+        <label class="toggle-line"><span><strong>其他物種候選也發出警報（實驗）</strong><small>預設關閉。CLIP 不是經校準的物種辨識器，建議先人工複核候選結果。</small></span><input type="checkbox" id="speciesAlertToggle" role="switch"></label>
         <label for="advancedScope" class="field-label">進階辨識範圍</label>
-        <select id="advancedScope"><option value="six" selected>專用六類：麝香貓、穿山甲、食蟹獴、白鼻心、貓、狗</option><option value="world">全球廣域：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
-        <p class="scope-explain" id="scopeDescription">六類模式：先判斷動物目標，再比對麝香貓、穿山甲、食蟹獴、白鼻心、貓及狗。不能確認時拒絕猜測。</p>
+        <select id="advancedScope"><option value="world" selected>全球廣域（預設）：哺乳、鳥、爬蟲、兩棲、魚、昆蟲、植物、真菌等</option><option value="six">僅比對七種重點動物（選用）</option><option value="taiwan">臺灣保育類與常見野生動物（重點比對）</option><option value="custom">自訂候選物種（可補充未列出的生物）</option></select>
+        <p class="scope-explain" id="scopeDescription">全球模式先比對生物大類再比對支援的物種候選；七種重點動物另有強化警報，無法保證辨識所有物種。</p>
         <div id="customScopeBox" hidden><label class="field-label" for="customSpecies">自訂物種名稱（英文／學名，用逗號分隔，最多 20 種）</label><input id="customSpecies" type="text" maxlength="600" placeholder="例如：snow leopard, axolotl, horseshoe crab"><p class="hint">英文或拉丁學名比中文更符合此模型訓練方式；候選只做相似度比對，不能保證辨認正確。</p></div>
         <label class="toggle-line"><span><strong>靜態生物分析</strong><small>即使畫面沒有移動也分析植物、真菌和停棲動物，可能增加誤報及運算量。</small></span><input type="checkbox" id="stationaryToggle" role="switch"></label>
-        <p class="hint" id="advancedStatus" aria-live="polite">六類候選分析預設開啟，但只在出現動物或移動區域時才載入；貓狗一般模型會先運行。</p><p class="hint" id="precisionStatus" aria-live="polite">V6.0：指定六類辨識。貓狗使用即時模型；麝香貓、穿山甲、食蟹獴與白鼻心仍需專家確認。</p>
+        <p class="hint" id="advancedStatus" aria-live="polite">全球候選分析預設開啟；一般動物由即時模型偵測，其他物種透過進階 AI 候選比對。</p><p class="hint" id="precisionStatus" aria-live="polite">V7.0：全球廣域候選 + 七種動物強化警報。候選物種不能視為可靠鑑定。</p>
        <div class="range-heading"><label for="speciesThreshold" class="field-label">物種候選比對分數門檻</label><strong id="speciesThresholdValue">26%</strong></div><input id="speciesThreshold" type="range" min="10" max="60" step="2" value="26"><p class="hint">分數僅表示目前候選清單中的相對排名，不是正確率。全球模式先選生物大類再比較候選；若比對不明確，顯示「無法確認」，不強制猜測。</p>
        <div class="divider"></div><label class="toggle-line"><span><strong>警報提示音</strong><small>偵測到新的生物類別時播放</small></span><input type="checkbox" id="soundToggle" checked role="switch"></label>
        <label class="toggle-line"><span><strong>中文語音播報</strong><small>例如：「偵測到一隻狗」</small></span><input type="checkbox" id="speechToggle" role="switch"></label>
@@ -134,7 +138,7 @@ html:fullscreen .app-shell{max-width:none;width:100%;min-height:100vh}
    <section class="panel history-panel"><div class="panel-head history-head"><div><div class="panel-kicker">ACTIVITY LOG</div><h3>警報事件紀錄 <span id="historyCount" class="history-count">0</span></h3></div><div class="history-actions"><button class="secondary small" id="exportBtn">匯出 CSV</button><button class="secondary small" id="clearBtn">清除紀錄</button></div></div><p class="hint review-help">每筆警報可標記「正確／誤判」，便於匯出實際測試結果；這不會自行重新訓練 AI。</p><div class="log-list" id="logList"><div class="log-empty">目前沒有警報紀錄。啟動攝影機，等待目標進入畫面。</div></div></section>
    <section class="notice"><strong>先偵測動物，再猜測候選物種：避免空景誤判</strong><p>一般即時目標框使用 COCO-SSD，僅支援固定的少數動物與人。進階全球模式使用 CLIP 先比對生物門類，再於目前內建的多種候選物種中找相似影像，包括哺乳類、鳥類、爬蟲類、兩棲類、魚類、昆蟲、蜘蛛與其他節肢動物、海洋無脊椎動物、植物及真菌，也可自行輸入額外英文／學名。<strong>這不是全世界所有物種的辨識資料庫；未知、新發現、微生物，以及畫質不足的生物都可能無法辨識。</strong></p><p>「疑似物種」及顯示的百分比只是候選之間的相對比較分數，<strong>並非可信度保證、真正機率、法定保育類鑑定或已確認物種。</strong> 任何保育類、罕見生物都需要保留原始影像並交由專家複核。植物與真菌可能是靜止目標，啟用靜態分析會增加誤報可能。瀏覽器必須保持開啟；模型下載需網路與裝置資源。一般鏡頭不能辨識肉眼不可見的微生物。</p></section>
   </main>
-  <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。</footer>
+  <footer>BioWatch AI · 為個人觀察與輔助警示設計，不替代專業保全、野生動物監測或生命安全設備。 <a href="/experiment.html" style="color:#7b9ba8">實驗照片測試</a></footer>
  </div>
  <div class="toast" id="toast" role="status" aria-live="polite"></div>
  <script>
@@ -493,12 +497,12 @@ const FOCUS_SPECIES = [
   ['pangolin','穿山甲','protected','🦔','a trail camera photograph of a Chinese pangolin (Manis pentadactyla), overlapping brown scales on its back and tail','mammals'],
   ['crab_mongoose','食蟹獴','protected','🦦','a trail camera photograph of a crab-eating mongoose (Urva urva or Herpestes urva), dark brown fur and long pale cheek stripes','mammals'],
   ['masked_palm_civet','白鼻心','protected','🦝','a trail camera photograph of a masked palm civet (Paguma larvata), dark face with white mask and pale nose markings','mammals'],
+  ['ferret_badger','鼬獾','other','🦡','a wildlife trail camera photograph of a Taiwan ferret badger (Melogale moschata), white forehead stripes, pale cheeks and dark muzzle','mammals'],
   ['cat','貓','pets','🐱','a photograph of a domestic cat, Felis catus','mammals'],
   ['dog','狗','pets','🐶','a photograph of a domestic dog, Canis lupus familiaris','mammals']
 ];
 for(const species of FOCUS_SPECIES){if(!SPECIES.some(s=>s[0]===species[0]))SPECIES.push(species);}
 const FOCUS_NEGATIVES = [
-  'a trail camera photo of a ferret badger (Melogale moschata)',
   'a trail camera photo of a leopard cat (Prionailurus bengalensis)',
   'a photo of a yellow-throated marten',
   'a photo of a raccoon with a dark mask',
@@ -510,7 +514,8 @@ const FOCUS_NEGATIVES = [
   'a trail camera image of a person',
   'a photograph of an animal toy or statue'
 ];
-const FOCUS_FILTER_IDS = {small_indian_civet:'focusCivet',pangolin:'focusPangolin',crab_mongoose:'focusMongoose',masked_palm_civet:'focusMasked',cat:'focusCat',dog:'focusDog'};
+const FOCUS_FILTER_IDS = {small_indian_civet:'focusCivet',pangolin:'focusPangolin',crab_mongoose:'focusMongoose',masked_palm_civet:'focusMasked',ferret_badger:'focusFerret',cat:'focusCat',dog:'focusDog'};
+function isPrioritySpecies(kind){const id=FOCUS_FILTER_IDS[kind];return Boolean(id&&$(id)?.checked)}
 const FAMILY_OVERRIDES = {
   mammals:'leopard_cat formosan_bear pangolin otter serow yellow_marten macaque wild_boar deer squirrel rabbit raccoon fox mouse',
   birds:'spoonbill grass_owl hawk_eagle blue_magpie swinhoes_pheasant',
@@ -758,9 +763,9 @@ function customCandidates(){
 function advancedScopeChanged(){
   const scope=$('advancedScope').value;
   $('customScopeBox').hidden=scope!=='custom';
-  $('sixTargetChecks').hidden=scope!=='six';$('sixTargetTitle').hidden=scope!=='six';$('focusWarning').hidden=scope!=='six';
+  $('sixTargetChecks').hidden=false;$('sixTargetTitle').hidden=false;$('focusWarning').hidden=false;
   $('legacyTitle').hidden=scope==='six';$('legacyFilters').hidden=scope==='six';
-  $('scopeDescription').textContent=scope==='six'?'只比對指定六種動物與相似物種排除項；麝香貓、穿山甲、食蟹獴、白鼻心為疑似候選，必須人工複核。':scope==='world'?'廣域模式先判斷哺乳、鳥、魚、蟲、植物等生物大類，再比對內建候選物種；未列入的物種可切換自訂模式。':scope==='taiwan'?'優先比對臺灣保育類與常見野生動物，並使用背景類別降低誤報。':'最多輸入 20 種英文名稱或拉丁學名；模型會在這些候選與背景類別之間比對。';
+  $('scopeDescription').textContent=scope==='six'?'只比對七種重點動物；野生動物仍屬疑似候選，需人工複核。':scope==='world'?'全球廣域：先比對生物大類，再比對支援的候選物種；七種重點動物提升警示強度。':scope==='taiwan'?'優先比對臺灣保育類與常見野生動物，並使用背景類別降低誤報。':'最多輸入 20 種英文名稱或拉丁學名；模型會在這些候選與背景類別之間比對。';
   state.advancedCandidate=null;state.advancedEvidence=null;state.advancedFrame=null;state.lastMotion=performance.now();
   state.advancedError=false;
   if(state.running&&$('advancedToggle').checked){clearTimeout(state.advancedTimer);if(!state.advancedBusy)startAdvanced(state.session);}
@@ -772,7 +777,7 @@ async function compareAdvanced(model,data){
   let familyName='';
   if(scope==='six'){
     choices=FOCUS_SPECIES.filter(s=>wanted({class:s[0]}));
-    familyName='六種指定動物';
+    familyName='七種重點動物';
   }else if(scope==='world'){
     const broadNegatives=NEGATIVES.filter(s=>!s.includes('grass and trees')&&!s.includes('empty forest'));
     const coarse=await model(data,FAMILY_PROMPTS.concat(broadNegatives));
@@ -1374,9 +1379,11 @@ function setUltraStrictDefault(){
   $('confirmFrames').value='5';
   $('speciesThreshold').value='26';
   $('stationaryToggle').checked=false;
-  $('advancedScope').value='six';
+  $('advancedScope').value='world';
   $('advancedToggle').checked=true;
   $('speciesAlertToggle').checked=false;
+  $('focusAlarmToggle').checked=true;
+  Object.values(FOCUS_FILTER_IDS).forEach(id=>$(id).checked=true);
   $('debugPredictions').checked=false;
   updateSliders();
 }
